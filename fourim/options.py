@@ -1,5 +1,7 @@
 from types import SimpleNamespace
 
-model = SimpleNamespace(avail=["Gaussian"])
+geometry = SimpleNamespace(width=400, height=300)
 
-OPTIONS = SimpleNamespace(model=model)
+model = SimpleNamespace(avail=["Point Source", "Gaussian"])
+
+OPTIONS = SimpleNamespace(model=model, geometry=geometry)
