@@ -1,5 +1,29 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QSlider, QLineEdit, QLabel
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QSlider, \
+    QLineEdit, QLabel, QScrollArea, QVBoxLayout
 from PySide6.QtCore import Qt
+
+
+class ScrollBar(QWidget):
+    """A scroll bar widget."""
+    def __init__(self, parent: QWidget = None) -> None:
+        """The class constructor."""
+        super().__init__(parent)
+        self.sliders_layout = QVBoxLayout()
+
+        self.sliders_container = QWidget()
+        
+        for _ in range(10):
+            slider = SliderWithInput("x", 0, 10, 0)
+            self.sliders_layout.addWidget(slider)
+        
+        self.sliders_container.setLayout(self.sliders_layout)
+        
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(self.sliders_container)
+
+        main_layout = QVBoxLayout(self)
+        main_layout.addWidget(self.scroll_area)
 
 
 class SliderWithInput(QWidget):
