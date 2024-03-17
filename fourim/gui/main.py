@@ -10,7 +10,7 @@ class MainWindow(QMainWindow):
     """Main window for the application."""
 
     def __init__(self):
-        """The class constructor."""
+        """The class's initialiser."""
         super().__init__()
         self.setWindowTitle("Fourim")
         self.setGeometry(100, 100, OPTIONS.geometry.width, OPTIONS.geometry.height)
@@ -18,8 +18,8 @@ class MainWindow(QMainWindow):
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)
 
-        self.settings_tab = SettingsTab(self)
         self.plot_tab = PlotTab(self)
+        self.settings_tab = SettingsTab(self, plots=self.plot_tab)
 
         self.tab_widget.addTab(self.plot_tab, "Graphs")
         self.tab_widget.addTab(self.settings_tab, "Settings")

@@ -27,7 +27,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent: QWidget, width: int,
                  height: int, dpi: int = 300) -> None:
-        """The class constructor."""
+        """The class's initialiser."""
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         super(MplCanvas, self).__init__(fig)
@@ -41,5 +41,6 @@ class MplCanvas(FigureCanvasQTAgg):
             self.axes.imshow(xdata)
         else:
             self.axes.plot(xdata, ydata)
+            self.axes.set_ylim([-0.1, 1.1])
         self.draw()
 
