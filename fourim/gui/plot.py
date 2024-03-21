@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import matplotlib
 import numpy as np
@@ -8,6 +8,8 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from PySide6.QtWidgets import QWidget
+
+from ..options import OPTIONS
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -34,13 +36,15 @@ class MplCanvas(FigureCanvasQTAgg):
         self.show()
 
     def update_plot(self, xdata: np.ndarray,
-                    ydata: Optional[np.ndarray] = None) -> None:
+                    ydata: Optional[np.ndarray] = None,
+                    ylims: Optional[List[float]] = None) -> None:
         """Update the plot with the new model images."""
         self.axes.cla()
-        if ydata is None:
-            self.axes.imshow(xdata)
-        else:
+        if OPTIONS.display.one_dimensional:
+            if ylims is not None:
+                self.axes.set_ylim(ylims)
             self.axes.plot(xdata, ydata)
-            self.axes.set_ylim([-0.1, 1.1])
+        else:
+            self.axes.imshow(xdata)
         self.draw()
 
