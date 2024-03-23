@@ -8,7 +8,7 @@ presets = SimpleNamespace(ring={"rin": 20, "thin": False, "width": 0.1})
 model = SimpleNamespace(active=None, selected="PointSource",
                         avail=["PointSource", "Star", "Ring", "UniformDisk",
                                "Gaussian", "Lorentzian", "GaussLorentzian"],
-                        presets=presets,
-                        dim=128, pixel_size=0.1*u.mas, wl=[10]*u.um)
+                        presets=presets, one_dim=4096, two_dim=1024,
+                        pixel_size=0.1*u.mas, wl=[10]*u.um)
 
 OPTIONS = SimpleNamespace(model=model, geometry=geometry, display=display)

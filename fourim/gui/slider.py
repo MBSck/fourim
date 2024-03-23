@@ -1,5 +1,6 @@
 from typing import Optional
 
+import numpy as np
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QSlider, \
     QLineEdit, QLabel, QScrollArea, QVBoxLayout, QComboBox, QRadioButton
 from PySide6.QtCore import Qt
@@ -26,13 +27,17 @@ class SliderWithInput(QWidget):
     """
 
     def __init__(self, parent: QWidget, name: str, unit: str,
-                 min_value: float, max_value: float, initial_value: float) -> None:
+                 min_value: float, max_value: float,
+                 initial_value: Optional[float] = None) -> None:
         """The class's initialiser."""
         super().__init__()
         self.parent = parent
+
         self.scaling = 1
         if min_value == 0 and max_value == 1:
             self.scaling = 10
+        else:
+            self.scaling = 10*np.diff([min_value, max_value])[0]
 
         main_layout = QVBoxLayout()
         
@@ -50,7 +55,7 @@ class SliderWithInput(QWidget):
         self.slider.setValue(initial_value*self.scaling)
         self.slider.valueChanged.connect(self.updateLineEdit)
         
-        self.lineEdit = QLineEdit(str(initial_value/self.scaling))
+        self.lineEdit = QLineEdit(f"{initial_value/self.scaling:.2f}")
         self.lineEdit.returnPressed.connect(self.updateSliderFromLineEdit)
         
         slider_layout.addWidget(self.slider)
@@ -60,7 +65,7 @@ class SliderWithInput(QWidget):
         
     def updateLineEdit(self, value: float):
         """Updates the line edit with the new value."""
-        self.lineEdit.setText(str(value/self.scaling))
+        self.lineEdit.setText(f"{value/self.scaling:.2f}")
         getattr(OPTIONS.model.active, self.name).value = value/self.scaling
         self.parent.parent.display_model()
         

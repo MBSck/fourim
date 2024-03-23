@@ -28,7 +28,7 @@ class MplCanvas(FigureCanvasQTAgg):
     """
 
     def __init__(self, parent: QWidget, width: int,
-                 height: int, dpi: int = 300) -> None:
+                 height: int, dpi: Optional[int] = 300) -> None:
         """The class's initialiser."""
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
@@ -37,14 +37,18 @@ class MplCanvas(FigureCanvasQTAgg):
 
     def update_plot(self, xdata: np.ndarray,
                     ydata: Optional[np.ndarray] = None,
-                    ylims: Optional[List[float]] = None) -> None:
+                    ylims: Optional[List[float]] = None,
+                    title: Optional[str] = None,
+                    ylabel: Optional[str] = None) -> None:
         """Update the plot with the new model images."""
         self.axes.cla()
         if OPTIONS.display.one_dimensional:
-            if ylims is not None:
-                self.axes.set_ylim(ylims)
             self.axes.plot(xdata, ydata)
+            self.axes.set_ylim(ylims)
+            self.axes.set_ylabel(ylabel)
+            self.axes.set_xlabel(r"$B_{\mathrm{eff}}$ $\left(M\lambda\right)$")
         else:
             self.axes.imshow(xdata)
+        self.axes.set_title(title)
         self.draw()
 
