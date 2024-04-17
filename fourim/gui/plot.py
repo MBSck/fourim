@@ -46,7 +46,7 @@ class MplCanvas(FigureCanvasQTAgg):
         if ydata is not None:
             self.axes.plot(xdata, ydata)
             self.axes.set_ylim(ylims)
-            self.axes.set_xlabel(r"$B_{\mathrm{eff}}$ $\left(M\lambda\right)$")
+            self.axes.set_xlabel(r"$B_{\mathrm{eff}}$ $\left(\mathrm{M}\lambda\right)$")
         else:
             self.axes.imshow(xdata, extent=extent,
                              vmin=vlims[0], vmax=vlims[1])
