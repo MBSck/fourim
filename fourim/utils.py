@@ -1,7 +1,9 @@
+from pathlib import Path
 from typing import List
 
-from ppdmod.component import Component
 from ppdmod import basic_components
+from ppdmod.component import Component
+from ppdmod.data import ReadoutFits
 
 from .options import OPTIONS
 
@@ -45,3 +47,19 @@ class ComponentManager:
         """Returns all components in a list."""
         return list(self.components.values())
 
+
+class FileManager:
+    """A manager for the files in the application."""
+
+    def __init__(self):
+        self.files = {}
+
+    def add_file(self, file_path: str) -> None:
+        """Adds a file to the manager."""
+        file_path = Path(file_path)
+        self.files[file_path.name] = ReadoutFits(file_path)
+
+    def remove_file(self, file_path: str) -> None:
+        """Removes the file with the given path."""
+        if file_path in self.files:
+            del self.files[file_path]

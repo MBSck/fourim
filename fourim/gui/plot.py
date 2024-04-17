@@ -8,6 +8,7 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from PySide6.QtWidgets import QWidget
+from ppdmod.options import plot
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -55,3 +56,15 @@ class MplCanvas(FigureCanvasQTAgg):
         self.axes.set_title(title)
         self.draw()
 
+    # TODO: Add Better color support
+    def overplot(self, xdata: np.ndarray,
+                 ydata: np.ndarray,
+                 yerr: Optional[np.ndarray] = None,
+                 label: Optional[str] = None) -> None:
+        """Overplot the data."""
+        if yerr is not None:
+            self.axes.errorbar(xdata, ydata, yerr,
+                               label=label, fmt="o", **vars(plot.errorbar))
+        else:
+            self.axes.scatter(xdata, ydata, label=label, **vars(plot.scatter))
+        self.draw()

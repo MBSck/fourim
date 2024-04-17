@@ -11,6 +11,6 @@ components = SimpleNamespace(avail=["PointSource", "Star", "Ring", "UniformDisk"
                                     "Gaussian", "Lorentzian", "GaussLorentzian"],
                              presets=presets)
 model = SimpleNamespace(components=components, one_dim=4096, two_dim=512,
-                        pixel_size=0.1*u.mas, wl=[3.5]*u.um)
+                        pixel_size=0.1*u.mas, wl=[3.2]*u.um)
 
 OPTIONS = SimpleNamespace(model=model, geometry=geometry, display=display)

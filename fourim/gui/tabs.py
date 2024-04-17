@@ -1,9 +1,11 @@
+from pathlib import Path
 from typing import Optional
 
 import astropy.units as u
 import numpy as np
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, \
-    QLabel, QComboBox, QHBoxLayout, QRadioButton, QPushButton, QListWidget
+    QLabel, QComboBox, QHBoxLayout, QRadioButton, QPushButton, \
+    QListWidget, QFileDialog, QListWidgetItem
 from ppdmod.utils import compute_effective_baselines, compute_vis
 
 from .plot import MplCanvas
@@ -11,11 +13,10 @@ from .slider import ScrollBar
 from ..options import OPTIONS
 
 
-# TODO: Add setting for wavelength (maybe slider for wavelength range)
+# TODO: Move settings tab to its own file
 # TODO: Think about chaching the models if parameters are changed for wavelength playing
 # TODO: Make the 2D plots resize automatically, for bigger radii or model sizes
 # TODO: Add setting to choose between x, y and x and sep
-# TODO: Add file loading and overplotting
 # TODO: Add switch to baseline view (wavelengths on x-axis?) Or rather 
 # multiple wavelengths in one plot
 # Add logarithmic representation in image space
@@ -26,8 +27,9 @@ class SettingsTab(QWidget):
         """The class's initialiser."""
         super().__init__(parent)
         layout = QVBoxLayout()
-        self.plots = parent.plot_tab
         self.component_manager = parent.component_manager
+        self.file_manager = parent.file_manager
+        self.plots = parent.plot_tab
         self.setLayout(layout)
 
         label_model = QLabel("Model:")
@@ -96,6 +98,14 @@ class SettingsTab(QWidget):
         hLayout_coplanar.addWidget(self.coplanar_false_radio)
         layout.addWidget(title_coplanar)
         layout.addLayout(hLayout_coplanar)
+
+        title_file = QLabel("Data Files:")
+        self.open_file_button = QPushButton("Open (.fits)-file")
+        self.open_file_button.clicked.connect(self.open_file_dialog)
+        self.file_widget = QListWidget()
+        layout.addWidget(title_file)
+        layout.addWidget(self.open_file_button)
+        layout.addWidget(self.file_widget)
         
     def add_model(self) -> None:
         """Adds the model from the drop down selection to the model list."""
@@ -143,7 +153,46 @@ class SettingsTab(QWidget):
             OPTIONS.display.coplanar = False
         self.plots.display_model()
 
+    def open_file_dialog(self):
+        """Open a file dialog to select files to open.
 
+        Allows for multiple file opening.
+        """
+        file_names, _ = QFileDialog.getOpenFileNames(
+                self, "Open File", "", "All Files (*);;Text Files (*.txt)")
+
+        for file_name in file_names:
+            self.add_file_to_list(file_name)
+
+    def add_file_to_list(self, file_name: Path):
+        """Add a file to the list widget."""
+        text = Path(file_name)
+        item = QListWidgetItem(self.file_widget)
+        item.setText(text.name)
+
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        close_button = QPushButton("X")
+        close_button.clicked.connect(lambda: self.remove_file(item))
+        layout.addStretch(1)
+        layout.addWidget(close_button)
+        layout.addStretch()
+
+        widget.setLayout(layout)
+        item.setSizeHint(widget.sizeHint())
+        self.file_widget.addItem(item)
+        self.file_widget.setItemWidget(item, widget)
+        self.file_manager.add_file(file_name)
+        self.plots.display_model()
+
+    def remove_file(self, item):
+        """Remove a file from the list widget."""
+        row = self.file_widget.row(item)
+        self.file_manager.remove_file(item.text())
+        self.file_widget.takeItem(row)
+        self.plots.display_model()
+
+# TODO: Move plot tab to its own file
 # TODO: Add support for different scalings of the 1D baseline axis
 # TODO: Add support to overplot the different VLTI and ALMA configurations
 # TODO: Add save and load functionalities to models
@@ -154,6 +203,7 @@ class PlotTab(QWidget):
         """The class's initialiser."""
         super().__init__(parent)
         self.component_manager = parent.component_manager
+        self.file_manager = parent.file_manager
 
         layout = QGridLayout()
 
@@ -172,11 +222,13 @@ class PlotTab(QWidget):
         self.setLayout(layout)
         self.display_model()
 
+    # TODO: Add legend at some point
     def display_model(self):
         """Displays the model in the plot."""
         components = self.component_manager.components
         wl, pixel_size = OPTIONS.model.wl, OPTIONS.model.pixel_size
         dim1d, dim2d = OPTIONS.model.one_dim, OPTIONS.model.two_dim
+        output = OPTIONS.display.output
 
         # TODO: Include here also the calculation of T3 from the model and show
         # the ones from the files
@@ -194,7 +246,7 @@ class PlotTab(QWidget):
             image /= image.max()
             max_im = (dim2d/2*pixel_size).value
 
-            if OPTIONS.display.output == "vis2":
+            if output == "vis2":
                 vis = vis**2
                 vis_label = "Squared Visibility"
             else:
@@ -207,6 +259,28 @@ class PlotTab(QWidget):
                                            title=f"{vis_label} (Normalised)")
             self.canvas_right.update_plot(baselines.value, phases, ylims=[-185, 185],
                                           title="Phase (Degrees)")
+
+            # TODO: Add model t3 here
+            if self.file_manager.files:
+                for readout in self.file_manager.files.values():
+                    vis = getattr(readout, output)
+                    baselines, _ = compute_effective_baselines(
+                            vis.ucoord, vis.ucoord,
+                            components[0].inc.value, components[0].pa.value)
+                    value = readout.get_data_for_wavelength(wl, output, "value").flatten()
+                    err = readout.get_data_for_wavelength(wl, output, "err").flatten()
+                    self.canvas_middle.overplot(baselines, value, yerr=err)
+
+                    t3 = readout.t3
+                    baselines, _ = compute_effective_baselines(
+                            t3.u123coord, t3.u123coord,
+                            components[0].inc.value, components[0].pa.value,
+                            longest=True)
+
+                    value = readout.get_data_for_wavelength(wl, "t3", "value").flatten()
+                    err = readout.get_data_for_wavelength(wl, "t3", "err").flatten()
+                    self.canvas_right.overplot(baselines, value, yerr=err)
+
         # TODO: Think about using the real fouriertransform to makes these images quickly
         else:
             # fourier = compute_vis(jnp.fft.fftshift(jnp.fft.fft2(jnp.fft.fftshift(image))))
