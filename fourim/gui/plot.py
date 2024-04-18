@@ -1,12 +1,13 @@
 from typing import List, Optional
 
 import matplotlib
+import matplotlib.lines as mlines
 import numpy as np
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
 
 matplotlib.use('Qt5Agg')
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
 from PySide6.QtWidgets import QWidget
 from ppdmod.options import plot
 
@@ -66,5 +67,17 @@ class MplCanvas(FigureCanvasQTAgg):
             self.axes.errorbar(xdata, ydata, yerr,
                                label=label, fmt="o", **vars(plot.errorbar))
         else:
-            self.axes.scatter(xdata, ydata, label=label, **vars(plot.scatter))
+            scatter_kwargs = plot.scatter
+            scatter_kwargs.color = None
+            self.axes.scatter(xdata, ydata, label=label,
+                              marker="X", **vars(scatter_kwargs))
+        self.draw()
+
+    def add_legend(self) -> None:
+        """Add a legend to the plot."""
+        dot_label = mlines.Line2D([], [], color="k", marker="o",
+                                  linestyle="None", label="Data", alpha=0.6)
+        x_label = mlines.Line2D([], [], color="k", marker="X",
+                                linestyle="None", label="Model")
+        self.axes.legend(handles=[dot_label, x_label])
         self.draw()

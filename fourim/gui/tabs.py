@@ -6,7 +6,7 @@ import numpy as np
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, \
     QLabel, QComboBox, QHBoxLayout, QRadioButton, QPushButton, \
     QListWidget, QFileDialog, QListWidgetItem
-from ppdmod.utils import compute_effective_baselines, compute_vis
+from ppdmod.utils import compute_effective_baselines, compute_vis, compute_t3
 
 from .plot import MplCanvas
 from .slider import ScrollBar
@@ -280,6 +280,12 @@ class PlotTab(QWidget):
                     value = readout.get_data_for_wavelength(wl, "t3", "value").flatten()
                     err = readout.get_data_for_wavelength(wl, "t3", "err").flatten()
                     self.canvas_right.overplot(baselines, value, yerr=err)
+
+                    complex_vis = np.sum([comp.compute_complex_vis(t3.u123coord, t3.v123coord, wl)
+                                   for comp in components.values()], axis=0)
+                    closure_phase = compute_t3(complex_vis)
+                    self.canvas_right.overplot(baselines, closure_phase)
+                    self.canvas_right.add_legend()
 
         # TODO: Think about using the real fouriertransform to makes these images quickly
         else:
