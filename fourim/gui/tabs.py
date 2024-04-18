@@ -233,7 +233,7 @@ class PlotTab(QWidget):
         # TODO: Include here also the calculation of T3 from the model and show
         # the ones from the files
         if OPTIONS.display.one_dimensional:
-            ucoord = np.linspace(0, 100, dim1d)*u.m
+            ucoord = np.linspace(0, 150, dim1d)*u.m
             # TODO: Make it so that position angle and so can be NOT shared
             baselines, _ = compute_effective_baselines(
                     ucoord, ucoord, components[0].inc.value, components[0].pa.value)
@@ -260,7 +260,6 @@ class PlotTab(QWidget):
             self.canvas_right.update_plot(baselines.value, phases, ylims=[-185, 185],
                                           title="Phase (Degrees)")
 
-            # TODO: Add model t3 here
             if self.file_manager.files:
                 for readout in self.file_manager.files.values():
                     vis = getattr(readout, output)
