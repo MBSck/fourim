@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path
 from typing import List
 
@@ -6,6 +7,15 @@ from ppdmod.component import Component
 from ppdmod.data import ReadoutFits
 
 from .options import OPTIONS
+
+
+def get_available_components() -> List[str]:
+    """Returns a list of available components."""
+    components = []
+    for name, obj in inspect.getmembers(basic_components):
+        if inspect.isclass(obj) and obj.__module__ == basic_components.__name__:
+            components.append(name)
+    return components
 
 
 # TODO: Test if this also works when models are removed and new ones added

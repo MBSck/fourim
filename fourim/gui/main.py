@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
 
 from .tabs import SettingsTab, PlotTab
 from ..options import OPTIONS
-from ..utils import ComponentManager, FileManager
+from ..utils import ComponentManager, FileManager, get_available_components
 
 
 class MainWindow(QMainWindow):
@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         """The class's initialiser."""
         super().__init__()
+        OPTIONS.model.components.avail = get_available_components()
         self.component_manager = ComponentManager()
         self.component_manager.add_component("PointSource")
         self.file_manager = FileManager()

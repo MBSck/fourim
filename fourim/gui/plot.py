@@ -76,8 +76,8 @@ class MplCanvas(FigureCanvasQTAgg):
     def add_legend(self) -> None:
         """Add a legend to the plot."""
         dot_label = mlines.Line2D([], [], color="k", marker="o",
-                                  linestyle="None", label="Data", alpha=0.6)
+                                  linestyle="None", label="T3 Data", alpha=0.6)
         x_label = mlines.Line2D([], [], color="k", marker="X",
-                                linestyle="None", label="Model")
+                                linestyle="None", label="T3 Model")
         self.axes.legend(handles=[dot_label, x_label])
         self.draw()

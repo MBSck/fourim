@@ -44,13 +44,12 @@ class SettingsTab(QWidget):
         button_layout.addWidget(self.remove_button)
 
         self.model_combo.setCurrentIndex(0)
-        self.selectedOption = self.model_combo.currentText()
         layout.addWidget(label_model)
         layout.addWidget(self.model_combo)
         layout.addLayout(button_layout)
         layout.addWidget(self.model_list)
 
-        self.model_list.addItem(self.model_combo.currentText())
+        self.model_list.addItem("PointSource")
         self.add_button.clicked.connect(self.add_model)
         self.remove_button.clicked.connect(self.remove_model)
 
