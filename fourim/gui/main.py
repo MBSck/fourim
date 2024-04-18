@@ -1,6 +1,7 @@
 import sys
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
+from PySide6.QtGui import QIcon, QPixmap
 
 from .tabs import SettingsTab, PlotTab
 from ..options import OPTIONS
@@ -33,6 +34,7 @@ class MainWindow(QMainWindow):
         self.file_manager = FileManager()
 
         self.setWindowTitle("Fourim")
+        self.setWindowIcon(QIcon(QPixmap("../../assets/icon.png")))
         self.setGeometry(100, 100, OPTIONS.geometry.width, OPTIONS.geometry.height)
 
         self.tab_widget = QTabWidget(self)
