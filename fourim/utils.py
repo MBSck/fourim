@@ -40,7 +40,10 @@ class ComponentManager:
         if hasattr(presets, component_name.lower()):
             params = {**getattr(presets, component_name.lower()), **params}
 
-        self.components[self.current_id] = getattr(basic_components, component_name)(**params)
+        component = self.components[self.current_id] = getattr(basic_components, component_name)(**params)
+        if "Halo" in component_name:
+            component.kc.free = False
+
         self.current_id += 1
         return self.current_id
 
