@@ -240,7 +240,7 @@ class PlotTab(QWidget):
             complex_vis = np.sum([comp.compute_complex_vis(ucoord, ucoord, wl)[0][0]
                                   for comp in components.values()], axis=0)
             vis, phases = compute_vis(complex_vis), np.angle(complex_vis, deg=True)
-            image = np.sum([comp.compute_image(dim2d, pixel_size, wl)[0].value
+            image = np.sum([comp.compute_image(dim2d, pixel_size, wl)[0]
                             for comp in components.values()], axis=0)
             image /= image.max()
             max_im = (dim2d/2*pixel_size).value
