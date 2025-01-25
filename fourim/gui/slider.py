@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QWidget, QHBoxLayout, QSlider, \
     QLineEdit, QLabel, QScrollArea, QVBoxLayout, QGridLayout
 from PySide6.QtCore import Qt
 
-from ..options import OPTIONS
+from ..backend.options import OPTIONS
 
 
 class SliderWithInput(QWidget):
@@ -59,11 +59,9 @@ class SliderWithInput(QWidget):
         """The class's initialiser."""
         super().__init__()
         self.parent, self.index = parent, index
-        self.component_manager = parent.component_manager
         self.scaling = np.diff([min_value, max_value])[0]*100
 
         main_layout = QVBoxLayout()
-        
         label_layout = QHBoxLayout()
         unit = f" ({unit})" if unit else ""
         self.name, self.label, self.unit = name, QLabel(name), QLabel(unit)
@@ -145,7 +143,6 @@ class ScrollBar(QWidget):
         """The class constructor."""
         super().__init__(parent)
         self.parent = parent
-        self.component_manager = parent.component_manager
 
         self.wavelength, self.names = None, []
         self.sliders_grid = QGridLayout()
@@ -155,7 +152,7 @@ class ScrollBar(QWidget):
         self.main_layout = QVBoxLayout(self)
         self.update_scrollbar()
         self.sliders_container.setLayout(self.sliders_grid)
-        
+
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.sliders_container)
@@ -193,7 +190,7 @@ class ScrollBar(QWidget):
             self.sliders = []
 
         row = 2
-        for index, component in self.component_manager.components.items():
+        for index, component in OPTIONS.components.current.items():
             component.fr.free = component.x.free = component.y.free = True
             component.inc.value = 1
 

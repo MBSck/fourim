@@ -3,14 +3,24 @@ from typing import Optional
 
 import astropy.units as u
 import numpy as np
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, \
-    QLabel, QComboBox, QHBoxLayout, QRadioButton, QPushButton, \
-    QListWidget, QFileDialog, QListWidgetItem
-from ppdmod.utils import compute_effective_baselines, compute_vis, compute_t3
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFileDialog,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QPushButton,
+    QRadioButton,
+    QVBoxLayout,
+    QWidget,
+)
 
+from ..backend.options import OPTIONS
+from ..backend.utils import compute_effective_baselines
 from .plot import MplCanvas
 from .slider import ScrollBar
-from ..options import OPTIONS
 
 
 # TODO: Move settings tab to its own file
@@ -27,8 +37,6 @@ class SettingsTab(QWidget):
         """The class's initialiser."""
         super().__init__(parent)
         layout = QVBoxLayout()
-        self.component_manager = parent.component_manager
-        self.file_manager = parent.file_manager
         self.plots = parent.plot_tab
         self.setLayout(layout)
 
@@ -191,6 +199,7 @@ class SettingsTab(QWidget):
         self.file_widget.takeItem(row)
         self.plots.display_model()
 
+
 # TODO: Move plot tab to its own file
 # TODO: Add support for different scalings of the 1D baseline axis
 # TODO: Add support to overplot the different VLTI and ALMA configurations
@@ -201,9 +210,6 @@ class PlotTab(QWidget):
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         """The class's initialiser."""
         super().__init__(parent)
-        self.component_manager = parent.component_manager
-        self.file_manager = parent.file_manager
-
         layout = QGridLayout()
 
         self.canvas_left = MplCanvas(self, width=5, height=4)
@@ -224,7 +230,7 @@ class PlotTab(QWidget):
     # TODO: Add legend at some point
     def display_model(self):
         """Displays the model in the plot."""
-        components = self.component_manager.components
+        components = OPTIONS.components.current
         wl, pixel_size = OPTIONS.model.wl, OPTIONS.model.pixel_size
         dim1d, dim2d = OPTIONS.model.one_dim, OPTIONS.model.two_dim
         output = OPTIONS.display.output
@@ -262,18 +268,18 @@ class PlotTab(QWidget):
             if self.file_manager.files:
                 for readout in self.file_manager.files.values():
                     vis = getattr(readout, output)
-                    baselines, _ = compute_effective_baselines(
-                            vis.ucoord, vis.ucoord,
-                            components[0].inc.value, components[0].pa.value)
+                    # baselines, _ = compute_effective_baselines(
+                    #         vis.ucoord, vis.ucoord,
+                    #         components[0].inc.value, components[0].pa.value)
                     value = readout.get_data_for_wavelength(wl, output, "value").flatten()
                     err = readout.get_data_for_wavelength(wl, output, "err").flatten()
                     self.canvas_middle.overplot(baselines, value, yerr=err)
 
                     t3 = readout.t3
-                    baselines, _ = compute_effective_baselines(
-                            t3.u123coord, t3.u123coord,
-                            components[0].inc.value, components[0].pa.value,
-                            longest=True)
+                    # baselines, _ = compute_effective_baselines(
+                    #         t3.u123coord, t3.u123coord,
+                    #         components[0].inc.value, components[0].pa.value,
+                    #         longest=True)
 
                     value = readout.get_data_for_wavelength(wl, "t3", "value").flatten()
                     err = readout.get_data_for_wavelength(wl, "t3", "err").flatten()
@@ -281,7 +287,7 @@ class PlotTab(QWidget):
 
                     complex_vis = np.sum([comp.compute_complex_vis(t3.u123coord, t3.v123coord, wl)
                                    for comp in components.values()], axis=0)
-                    closure_phase = compute_t3(complex_vis)
+                    # closure_phase = compute_t3(complex_vis)
                     self.canvas_right.overplot(baselines, closure_phase)
                     self.canvas_right.add_legend()
 

@@ -1,11 +1,8 @@
-import sys
-
-from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
 from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import QMainWindow, QTabWidget
 
-from .tabs import SettingsTab, PlotTab
-from ..options import OPTIONS
-from ..utils import ComponentManager, FileManager, get_available_components
+from ..backend.options import OPTIONS
+from .tabs import PlotTab, SettingsTab
 
 
 class MainWindow(QMainWindow):
@@ -28,11 +25,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         """The class's initialiser."""
         super().__init__()
-        OPTIONS.model.components.avail = get_available_components()
-        self.component_manager = ComponentManager()
-        self.component_manager.add_component("PointSource")
-        self.file_manager = FileManager()
-
         self.setWindowTitle("Fourim")
         self.setWindowIcon(QIcon(QPixmap("../../assets/icon.png")))
         self.setGeometry(100, 100, OPTIONS.geometry.width, OPTIONS.geometry.height)
@@ -45,10 +37,3 @@ class MainWindow(QMainWindow):
 
         self.tab_widget.addTab(self.plot_tab, "Graphs")
         self.tab_widget.addTab(self.settings_tab, "Settings")
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())

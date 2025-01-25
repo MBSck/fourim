@@ -6,10 +6,9 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
-matplotlib.use('Qt5Agg')
+matplotlib.use("Qt5Agg")
 
 from PySide6.QtWidgets import QWidget
-from ppdmod.options import plot
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -64,13 +63,9 @@ class MplCanvas(FigureCanvasQTAgg):
                  label: Optional[str] = None) -> None:
         """Overplot the data."""
         if yerr is not None:
-            self.axes.errorbar(xdata, ydata, yerr,
-                               label=label, fmt="o", **vars(plot.errorbar))
+            self.axes.errorbar(xdata, ydata, yerr, label=label, fmt="o")
         else:
-            scatter_kwargs = plot.scatter
-            scatter_kwargs.color = None
-            self.axes.scatter(xdata, ydata, label=label,
-                              marker="X", **vars(scatter_kwargs))
+            self.axes.scatter(xdata, ydata, label=label, marker="X")
         self.draw()
 
     def add_legend(self) -> None:
