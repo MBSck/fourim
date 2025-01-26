@@ -190,19 +190,16 @@ class ScrollBar(QWidget):
             self.sliders = []
 
         row = 2
-        for index, component in OPTIONS.components.current.items():
-            component.fr.free = component.x.free = component.y.free = True
-            component.inc.value = 1
-
-            name = QLabel(f"{component.shortname}:")
+        for index, component in OPTIONS.model.components.current.items():
+            name = QLabel(f"{component.name}:")
             self.sliders_grid.addWidget(name, row, 0)
             row += 1
 
             row, col, sliders_per_row = row, 0, 4
-            for param in component.get_params(free=True).values():
+            for param, value in vars(component.params).items():
                 slider = SliderWithInput(
-                        self, param.shortname, str(param.unit),
-                        param.min, param.max, param.value, index=index)
+                        self, param, "",
+                        0, 10, value, index=index)
                 self.sliders.append(slider)
                 self.sliders_grid.addWidget(slider)
 

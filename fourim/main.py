@@ -9,6 +9,7 @@ from .gui.main import MainWindow
 
 def main():
     OPTIONS.model.components.avail = get_available_components()
+    OPTIONS.model.components.current[0] = OPTIONS.model.components.avail["gaus"]
 
     app = QApplication(sys.argv)
     window = MainWindow()

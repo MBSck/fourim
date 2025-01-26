@@ -1,0 +1,10 @@
+[default]
+fr = 1
+inc = 1
+pa = 0
+
+[gaus]
+fwhm = 1
+
+[ring]
+rin = 1

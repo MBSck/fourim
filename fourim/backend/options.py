@@ -20,5 +20,5 @@ model = SimpleNamespace(
 )
 
 OPTIONS = SimpleNamespace(
-    model=model, geometry=geometry, components=components, display=display, files=files
+    model=model, geometry=geometry, display=display, files=files
 )
