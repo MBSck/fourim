@@ -12,7 +12,7 @@ matplotlib.use("Qt5Agg")
 from PySide6.QtWidgets import QGridLayout, QWidget
 
 from ..backend.options import OPTIONS
-from ..backend.utils import compute_effective_baselines, get_param_value
+from ..backend.utils import compute_image_grid, compute_baselines, get_param_value
 from .scrollbar import ScrollBar
 
 
@@ -129,37 +129,47 @@ class PlotTab(QWidget):
             ucoord = np.linspace(0, 150, dim1d) * u.m
             # TODO: Make this for each component individually
             params = list(components.values())[0].params
-            spf, psi = compute_effective_baselines(
+            inclination = get_param_value(params.cinc)
+            pos_angle = get_param_value(params.pa)
+            spf, psi = compute_baselines(
                 ucoord,
                 ucoord,
-                get_param_value(params.cinc),
-                get_param_value(params.pa),
+                inclination,
+                pos_angle,
             )
             spf_wl = (spf / wl.to(u.m)).value / u.rad
+            xcoord = np.linspace(-0.5, 0.5, dim2d) * dim2d * pixel_size
+            rho, theta = compute_image_grid(
+                *np.meshgrid(xcoord, xcoord),
+                inclination,
+                pos_angle,
+            )
 
             complex_vis, image = [], []
             for component in components.values():
                 complex_vis.append(
                     component.vis(spf_wl, 0, component.params).astype(complex)
                 )
-                # img = component.image(dim2d, pixel_size, wl)
-                # img /= img.max()
-                # image.append(img)
+                image.append(component.img(rho, theta, component.params))
+
+            # TODO: Work out how to norm this properly here
+            image = np.sum(image, axis=0)
+            image /= image.max()
 
             # TODO: Work out how to norm this properly here
             complex_vis = np.sum(complex_vis, axis=0)
             vis2 = np.abs(complex_vis) ** 2
             phase = np.angle(complex_vis, deg=True)
 
-            # max_im = (dim2d / 2 * pixel_size).value
-            # self.canvas_left.update_plot(
-            #     image,
-            #     title="Image",
-            #     vlims=[0, 1],
-            #     extent=[-max_im, max_im, -max_im, max_im],
-            #     xlabel=r"$\alpha$ (mas)",
-            #     ylabel=r"$\delta$ (mas)",
-            # )
+            max_im = (dim2d / 2 * pixel_size).value
+            self.canvas_left.update_plot(
+                image,
+                title="Model Image",
+                vlims=[0, 1],
+                extent=[-max_im, max_im, -max_im, max_im],
+                xlabel=r"$\alpha$ (mas)",
+                ylabel=r"$\delta$ (mas)",
+            )
             self.canvas_middle.update_plot(
                 spf.value,
                 vis2,

@@ -9,7 +9,28 @@ def get_param_value(param: SimpleNamespace):
     return param.value * param.unit
 
 
-def compute_effective_baselines(
+def compute_image_grid(
+    xcoord: u.mas,
+    ycoord: u.mas,
+    inclination: u.Quantity[u.one] | None = None,
+    pos_angle: u.Quantity[u.deg] | None = None,
+) -> Tuple[u.Quantity[u.mas], u.Quantity[u.mas]]:
+    if pos_angle is not None:
+        pos_angle = pos_angle.to(u.rad)
+        xcoord_rot = xcoord * np.cos(pos_angle) - ycoord * np.sin(pos_angle)
+        ycoord_rot = xcoord * np.sin(pos_angle) + ycoord * np.cos(pos_angle)
+    else:
+        xcoord_rot, ycoord_rot = xcoord, ycoord
+
+    if inclination is not None:
+        xcoord_rot *= inclination
+
+    rho = np.hypot(xcoord_rot, ycoord_rot)
+    theta = np.arctan2(ycoord_rot, xcoord_rot)
+    return rho.squeeze(), theta.squeeze()
+
+
+def compute_baselines(
     ucoord: u.m,
     vcoord: u.m,
     inclination: u.Quantity[u.one] | None = None,
@@ -41,21 +62,21 @@ def compute_effective_baselines(
     """
     if pos_angle is not None:
         pos_angle = pos_angle.to(u.rad)
-        ucoord_eff = ucoord * np.cos(pos_angle) - vcoord * np.sin(pos_angle)
-        vcoord_eff = ucoord * np.sin(pos_angle) + vcoord * np.cos(pos_angle)
+        ucoord_rot = ucoord * np.cos(pos_angle) - vcoord * np.sin(pos_angle)
+        vcoord_rot = ucoord * np.sin(pos_angle) + vcoord * np.cos(pos_angle)
     else:
-        ucoord_eff, vcoord_eff = ucoord, vcoord
+        ucoord_rot, vcoord_rot = ucoord, vcoord
 
     if inclination is not None:
-        ucoord_eff *= inclination
+        ucoord_rot *= inclination
 
-    baselines_eff = np.hypot(ucoord_eff, vcoord_eff)
-    baseline_angles_eff = np.arctan2(vcoord_eff, ucoord_eff)
+    spf = np.hypot(ucoord_rot, vcoord_rot)
+    psi = np.arctan2(vcoord_rot, ucoord_rot)
 
     if longest:
-        indices = baselines_eff.argmax(0)
-        iteration = np.arange(baselines_eff.shape[1])
-        baselines_eff = baselines_eff[indices, iteration]
-        baseline_angles_eff = baseline_angles_eff[indices, iteration]
+        indices = spf.argmax(0)
+        iteration = np.arange(spf.shape[1])
+        spf = spf[indices, iteration]
+        psi = psi[indices, iteration]
 
-    return baselines_eff.squeeze(), baseline_angles_eff.squeeze()
+    return spf.squeeze(), psi.squeeze()

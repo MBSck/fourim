@@ -25,7 +25,9 @@ def make_component(name: str) -> SimpleNamespace:
         params[param] = getattr(OPTIONS.model.params, param)
 
     component = SimpleNamespace(
-        name=name, vis=functions[f"{name}_vis"], params=SimpleNamespace(**params)
+        name=name, vis=functions[f"{name}_vis"],
+        img=functions[f"{name}_img"],
+        params=SimpleNamespace(**params)
     )
     return component
 
@@ -43,6 +45,15 @@ def make_component(name: str) -> SimpleNamespace:
 #     return np.sqrt(numerator / denominator)
 
 
+def gauss_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
+    fwhm = get_param_value(params.fwhm)
+    return (
+        np.exp(-4 * np.log(2) * rho**2 / fwhm**2)
+        / np.sqrt(np.pi / (4 * np.log(2)))
+        / fwhm
+    )
+
+
 def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
     """A Gaussian disk visibility function."""
     fr, fwhm = get_param_value(params.fr), get_param_value(params.fwhm)
@@ -53,6 +64,10 @@ def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
 #     """An uniform disk visibility function."""
 #     return 2 * j1(np.pi * diam.to(u.rad) * spf) / (np.pi * diam.to(u.rad) * spf)
 #
+
+def ring_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
+    rin = get_param_value(params.rin)
+    return np.where((rho > rin) & (rho < rin + np.diff(rho)[0]), 1, 0)
 
 
 def ring_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
