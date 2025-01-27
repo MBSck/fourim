@@ -1,0 +1,27 @@
+[fr]
+unit = "one"
+value = 1
+min = 0
+max = 1
+
+[cinc]
+unit = "one"
+value = 1
+min = 0
+max = 1
+
+[pa]
+unit = "deg"
+value = 0
+min = 0
+max = 360
+
+[rin]
+unit = "mas"
+min = 0
+max = 45
+
+[fwhm]
+unit = "mas"
+min = 0
+max = 45

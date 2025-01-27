@@ -1,37 +1,31 @@
 import inspect
-from pathlib import Path
 from types import SimpleNamespace
-from typing import Callable, Dict
 
 import astropy.units as u
 import numpy as np
-import toml
 from scipy.special import j0, j1, jv
 
 from .options import OPTIONS
 
 
-def get_available_components() -> Dict[str, Callable]:
-    """Returns a list of available components."""
-    with open(Path(__file__).parent.parent / "config" / "components.toml", "r") as f:
-        data = toml.load(f)
-
-    for key, value in data.items():
-        data[key] = {k: v * OPTIONS.model.params.units[k] for k, v in value.items()}
-
-    components = {}
+def make_component(name: str) -> SimpleNamespace:
+    """Makes a component from the presets."""
     current_module = inspect.getmodule(inspect.currentframe())
-    for name, obj in inspect.getmembers(current_module, inspect.isfunction):
-        if "vis" not in name:
-            continue
+    functions = dict(inspect.getmembers(current_module, inspect.isfunction))
+    available_components = OPTIONS.model.components.avail
 
-        component_name = name.split("_vis")[0]
-        params = SimpleNamespace(**data[component_name], **data["default"])
-        preset = SimpleNamespace(name=component_name, vis=obj, params=params)
-        # TODO: Add here the image function
-        components[component_name] = preset
+    presets = [
+        *available_components.default,
+        *getattr(available_components, name),
+    ]
+    params = {}
+    for param in presets:
+        params[param] = getattr(OPTIONS.model.params, param)
 
-    return components
+    component = SimpleNamespace(
+        name=name, vis=functions[f"{name}_vis"], params=SimpleNamespace(**params)
+    )
+    return component
 
 
 # def point_vis(spf, psi, **kwargs) -> np.ndarray:
@@ -49,7 +43,9 @@ def get_available_components() -> Dict[str, Callable]:
 
 def gaus_vis(spf, psi, **kwargs) -> np.ndarray:
     """A Gaussian disk visibility function."""
-    return np.exp(-((np.pi * fwhm.to(u.rad) * spf) ** 2) / (4 * np.log(2)))
+    return kwargs["fr"] * np.exp(
+        -((np.pi * kwargs["fwhm"].to(u.rad) * spf) ** 2) / (4 * np.log(2))
+    )
 
 
 # def uniform_disk_vis(spf, psi, **kwargs) -> np.ndarray:
@@ -57,9 +53,10 @@ def gaus_vis(spf, psi, **kwargs) -> np.ndarray:
 #     return 2 * j1(np.pi * diam.to(u.rad) * spf) / (np.pi * diam.to(u.rad) * spf)
 #
 
-def ring_vis(spf, ps, **kwargsi) -> np.ndarray:
+
+def ring_vis(spf, ps, **kwargs) -> np.ndarray:
     """A infinitesimally thin ring visibility function."""
-    return j0(2 * np.pi * rin.to(u.rad) * spf)
+    return kwargs["fr"] * j0(2 * np.pi * kwargs["rin"].to(u.rad) * spf)
 
 
 # TODO: Finish this

@@ -3,25 +3,29 @@ from types import SimpleNamespace
 
 import astropy.units as u
 import toml
+import yaml
 
 files = {}
 geometry = SimpleNamespace(width=1024, height=400)
 display = SimpleNamespace(one_dimensional=True, output="vis2", coplanar=True)
-presets = SimpleNamespace(
-    all={"elliptic": True, "diam": 1, "fwhm": 1},
-    ring={"rin": 1, "width": 0.1, "thin": False, "asymmetric": True},
-)
-components = SimpleNamespace(avail=[], current={})
-with open(Path(__file__).parent.parent / "config" / "units.toml", "r") as f:
-    units = toml.load(f)["params"]
 
-for key, value in units.items():
-    if value == "one":
-        units[key] = u.one
+with open(Path(__file__).parent.parent / "config" / "components.yaml", "r") as f:
+    avail = yaml.safe_load(f)
+
+components = SimpleNamespace(avail=SimpleNamespace(**avail), current={})
+
+with open(Path(__file__).parent.parent / "config" / "parameters.toml", "r") as f:
+    params = toml.load(f)
+
+for key, value in params.items():
+    if value["unit"] == "one":
+        params[key]["unit"] = u.one
     else:
-        units[key] = u.Unit(value)
+        params[key]["unit"] = u.Unit(value["unit"])
 
-params = SimpleNamespace(units=units)
+    params[key] = SimpleNamespace(**params[key])
+
+params = SimpleNamespace(**params)
 model = SimpleNamespace(
     components=components,
     params=params,

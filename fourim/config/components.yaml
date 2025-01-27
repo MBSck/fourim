@@ -1,0 +1,10 @@
+default:
+  - fr
+  - cinc
+  - pa
+
+gaus:
+  - fwhm
+
+ring:
+  - rin
