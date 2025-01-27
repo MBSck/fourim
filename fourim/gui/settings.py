@@ -1,12 +1,9 @@
 from pathlib import Path
 from typing import Optional
 
-import astropy.units as u
-import numpy as np
 from PySide6.QtWidgets import (
     QComboBox,
     QFileDialog,
-    QGridLayout,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -18,9 +15,6 @@ from PySide6.QtWidgets import (
 )
 
 from ..backend.options import OPTIONS
-from ..backend.utils import compute_effective_baselines
-from .plot import MplCanvas
-from .slider import ScrollBar
 
 
 # TODO: Move settings tab to its own file
@@ -43,7 +37,10 @@ class SettingsTab(QWidget):
         label_model = QLabel("Model:")
         self.model_combo = QComboBox()
         self.model_list = QListWidget()
-        self.model_combo.addItems(OPTIONS.model.components.avail)
+
+        available_components = list(vars(OPTIONS.model.components.avail).keys())
+        available_components.remove("default")
+        self.model_combo.addItems(available_components)
 
         self.add_button = QPushButton("+")
         self.remove_button = QPushButton("-")
@@ -201,116 +198,3 @@ class SettingsTab(QWidget):
         self.file_manager.remove_file(item.text())
         self.file_widget.takeItem(row)
         self.plots.display_model()
-
-
-# TODO: Move plot tab to its own file
-# TODO: Add support for different scalings of the 1D baseline axis
-# TODO: Add support to overplot the different VLTI and ALMA configurations
-# TODO: Add save and load functionalities to models
-class PlotTab(QWidget):
-    """The plot tab for the GUI."""
-
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
-        """The class's initialiser."""
-        super().__init__(parent)
-        layout = QGridLayout()
-
-        self.canvas_left = MplCanvas(self, width=5, height=4)
-        self.canvas_middle = MplCanvas(self, width=5, height=4)
-        self.canvas_right = MplCanvas(self, width=5, height=4)
-        self.scroll_bar = ScrollBar(self)
-        layout.addWidget(self.canvas_left, 0, 0)
-        layout.addWidget(self.canvas_middle, 0, 1)
-        layout.addWidget(self.canvas_right, 0, 2)
-        layout.addWidget(self.scroll_bar, 1, 0, 1, 3)
-
-        layout.setRowStretch(0, 2)
-        layout.setRowStretch(1, 1)
-
-        self.setLayout(layout)
-        self.display_model()
-
-    # TODO: Add legend at some point
-    def display_model(self):
-        """Displays the model in the plot."""
-        components = OPTIONS.model.components.current
-        wl, pixel_size = OPTIONS.model.wl, OPTIONS.model.pixel_size
-        dim1d, dim2d = OPTIONS.model.one_dim, OPTIONS.model.two_dim
-
-        if OPTIONS.display.one_dimensional:
-            ucoord = np.linspace(0, 150, dim1d) * u.m
-            # TODO: Make this for each component individually
-            baselines, _ = compute_effective_baselines(
-                ucoord, ucoord, components[0].params.inc, components[0].params.pa
-            )
-
-            complex_vis, image = [], []
-            for component in components.values():
-                # TODO: Make it so this is a simple namespace (vis + image)
-                # TODO: Make this calcualtion for spatial frequencies
-                complex_vis.append(component.vis(ucoord, ucoord, wl))
-                # img = component.image(dim2d, pixel_size, wl)
-                # img /= img.max()
-                # image.append(img)
-
-            vis = np.sum(complex_vis, axis=0).value
-
-            vis_label = "Visibility"
-            # max_im = (dim2d / 2 * pixel_size).value
-            # self.canvas_left.update_plot(
-            #     image,
-            #     title="Image",
-            #     vlims=[0, 1],
-            #     extent=[-max_im, max_im, -max_im, max_im],
-            #     xlabel=r"$\alpha$ (mas)",
-            #     ylabel=r"$\delta$ (mas)",
-            # )
-            self.canvas_middle.update_plot(
-                baselines.value,
-                vis,
-                ylims=[-0.1, 1.1],
-                title=r"$V^2$ (a.u.)",
-            )
-            # self.canvas_right.update_plot(
-            #     baselines.value, phases, ylims=[-185, 185], title="Phase (Degrees)"
-            # )
-
-            # if self.file_manager.files:
-            #     for readout in self.file_manager.files.values():
-            #         vis = getattr(readout, output)
-            #         # baselines, _ = compute_effective_baselines(
-            #         #         vis.ucoord, vis.ucoord,
-            #         #         components[0].inc.value, components[0].pa.value)
-            #         value = readout.get_data_for_wavelength(
-            #             wl, output, "value"
-            #         ).flatten()
-            #         err = readout.get_data_for_wavelength(wl, output, "err").flatten()
-            #         self.canvas_middle.overplot(baselines, value, yerr=err)
-            #
-            #         t3 = readout.t3
-            #         # baselines, _ = compute_effective_baselines(
-            #         #         t3.u123coord, t3.u123coord,
-            #         #         components[0].inc.value, components[0].pa.value,
-            #         #         longest=True)
-            #
-            #         value = readout.get_data_for_wavelength(wl, "t3", "value").flatten()
-            #         err = readout.get_data_for_wavelength(wl, "t3", "err").flatten()
-            #         self.canvas_right.overplot(baselines, value, yerr=err)
-            #
-            #         complex_vis = np.sum(
-            #             [
-            #                 comp.compute_complex_vis(t3.u123coord, t3.v123coord, wl)
-            #                 for comp in components.values()
-            #             ],
-            #             axis=0,
-            #         )
-            #         # closure_phase = compute_t3(complex_vis)
-            #         self.canvas_right.overplot(baselines, closure_phase)
-            #         self.canvas_right.add_legend()
-
-        # TODO: Think about using the real fouriertransform to makes these images quickly
-        # use Jax and the symmetries of Fourier transforms.
-        else:
-            # fourier = compute_vis(jnp.fft.fftshift(jnp.fft.fft2(jnp.fft.fftshift(image))))
-            # self.canvas_right.update_plot(fourier)
-            ...
