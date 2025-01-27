@@ -35,6 +35,4 @@ model = SimpleNamespace(
     wl=[3.2] * u.um,
 )
 
-OPTIONS = SimpleNamespace(
-    model=model, geometry=geometry, display=display, files=files
-)
+OPTIONS = SimpleNamespace(model=model, geometry=geometry, display=display, files=files)

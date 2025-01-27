@@ -9,7 +9,7 @@ from matplotlib.figure import Figure
 
 matplotlib.use("Qt5Agg")
 
-from PySide6.QtWidgets import QWidget, QGridLayout
+from PySide6.QtWidgets import QGridLayout, QWidget
 
 from ..backend.options import OPTIONS
 from ..backend.utils import compute_effective_baselines, get_param_value
@@ -128,23 +128,28 @@ class PlotTab(QWidget):
         if OPTIONS.display.one_dimensional:
             ucoord = np.linspace(0, 150, dim1d) * u.m
             # TODO: Make this for each component individually
+            params = list(components.values())[0].params
             spf, psi = compute_effective_baselines(
                 ucoord,
                 ucoord,
-                get_param_value(components[0].params.cinc),
-                get_param_value(components[0].params.pa),
+                get_param_value(params.cinc),
+                get_param_value(params.pa),
             )
             spf_wl = (spf / wl.to(u.m)).value / u.rad
 
             complex_vis, image = [], []
             for component in components.values():
-                complex_vis.append(component.vis(spf_wl, 0, component.params))
+                complex_vis.append(
+                    component.vis(spf_wl, 0, component.params).astype(complex)
+                )
                 # img = component.image(dim2d, pixel_size, wl)
                 # img /= img.max()
                 # image.append(img)
 
-            vis = np.sum(complex_vis, axis=0)
-            vis_label = "Visibility"
+            # TODO: Work out how to norm this properly here
+            complex_vis = np.sum(complex_vis, axis=0)
+            vis2 = np.abs(complex_vis) ** 2
+            phase = np.angle(complex_vis, deg=True)
 
             # max_im = (dim2d / 2 * pixel_size).value
             # self.canvas_left.update_plot(
@@ -157,13 +162,18 @@ class PlotTab(QWidget):
             # )
             self.canvas_middle.update_plot(
                 spf.value,
-                vis,
+                vis2,
                 ylims=[-0.1, 1.1],
-                title=r"$V^2$ (a.u.)",
+                ylabel=r"$V^2$ (a.u.)",
+                title=r"Amplitudes",
             )
-            # self.canvas_right.update_plot(
-            #     baselines.value, phases, ylims=[-185, 185], title="Phase (Degrees)"
-            # )
+            self.canvas_right.update_plot(
+                spf.value,
+                phase,
+                ylims=[-185, 185],
+                ylabel=r"$\phi$ ($^\circ$)",
+                title="Phases",
+            )
 
             # if self.file_manager.files:
             #     for readout in self.file_manager.files.values():

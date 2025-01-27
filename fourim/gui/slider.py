@@ -87,7 +87,9 @@ class SliderWithInput(QWidget):
         self.lineEdit.setText(f"{value / self.scaling:.2f}")
         if self.index is not None:
             components = OPTIONS.model.components.current
-            getattr(components[self.index].params, self.name).value = value / self.scaling
+            getattr(components[self.index].params, self.name).value = (
+                value / self.scaling
+            )
 
             # TODO: Make this somehow somwhere else so that one slider controls all
             if self.name in ["cinc", "pa"] and OPTIONS.display.coplanar:

@@ -7,6 +7,7 @@ from .backend.options import OPTIONS
 from .gui.main import MainWindow
 
 
+# TODO: Add x and y parameters and a shift as well
 def main():
     OPTIONS.model.components.current[0] = make_component("gauss")
     app = QApplication(sys.argv)

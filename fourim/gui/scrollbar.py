@@ -2,11 +2,11 @@ from typing import Optional
 
 import astropy.units as u
 from PySide6.QtWidgets import (
-    QWidget,
+    QGridLayout,
     QLabel,
     QScrollArea,
     QVBoxLayout,
-    QGridLayout,
+    QWidget,
 )
 
 from ..backend.options import OPTIONS
