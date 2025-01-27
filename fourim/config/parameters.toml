@@ -1,27 +1,32 @@
 [fr]
+name = "fr"
 unit = "one"
 value = 1
 min = 0
 max = 1
 
 [cinc]
+name = "cinc"
 unit = "one"
 value = 1
 min = 0
 max = 1
 
 [pa]
+name = "pa"
 unit = "deg"
 value = 0
 min = 0
 max = 360
 
 [rin]
+name = "rin"
 unit = "mas"
 min = 0
 max = 45
 
 [fwhm]
+name = "fwhm"
 unit = "mas"
 min = 0
 max = 45
