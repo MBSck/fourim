@@ -1,0 +1,3 @@
+include fourim/config/*.toml
+include fourim/config/*.yaml
+include assets/icon.png

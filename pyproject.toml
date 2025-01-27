@@ -52,7 +52,7 @@ dev = [
 ]
 
 [tool.setuptools]
-include-package-data = false
+include-package-data = true
 
 [tool.setuptools.dynamic]
 version = {attr = "fourim.__version__"}
