@@ -8,20 +8,25 @@ import numpy as np
 import toml
 from scipy.special import j0, j1, jv
 
+from .options import OPTIONS
+
 
 def get_available_components() -> Dict[str, Callable]:
     """Returns a list of available components."""
     with open(Path(__file__).parent.parent / "config" / "components.toml", "r") as f:
-        toml_data = toml.load(f)
+        data = toml.load(f)
+
+    for key, value in data.items():
+        data[key] = {k: v * OPTIONS.model.params.units[k] for k, v in value.items()}
 
     components = {}
     current_module = inspect.getmodule(inspect.currentframe())
     for name, obj in inspect.getmembers(current_module, inspect.isfunction):
-        if not "vis" in name:
+        if "vis" not in name:
             continue
 
         component_name = name.split("_vis")[0]
-        params = SimpleNamespace(**toml_data[component_name], **toml_data["default"])
+        params = SimpleNamespace(**data[component_name], **data["default"])
         preset = SimpleNamespace(name=component_name, vis=obj, params=params)
         # TODO: Add here the image function
         components[component_name] = preset
