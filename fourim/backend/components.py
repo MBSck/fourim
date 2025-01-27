@@ -5,6 +5,8 @@ import astropy.units as u
 import numpy as np
 from scipy.special import j0, j1, jv
 
+from fourim.backend.utils import get_param_value
+
 from .options import OPTIONS
 
 
@@ -41,11 +43,10 @@ def make_component(name: str) -> SimpleNamespace:
 #     return np.sqrt(numerator / denominator)
 
 
-def gaus_vis(spf, psi, **kwargs) -> np.ndarray:
+def gaus_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
     """A Gaussian disk visibility function."""
-    return kwargs["fr"] * np.exp(
-        -((np.pi * kwargs["fwhm"].to(u.rad) * spf) ** 2) / (4 * np.log(2))
-    )
+    fr, fwhm = get_param_value(params.fr), get_param_value(params.fwhm)
+    return fr * np.exp(-((np.pi * fwhm.to(u.rad) * spf) ** 2) / (4 * np.log(2)))
 
 
 # def uniform_disk_vis(spf, psi, **kwargs) -> np.ndarray:

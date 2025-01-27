@@ -1,7 +1,12 @@
+from types import SimpleNamespace
 from typing import Tuple
 
 import astropy.units as u
 import numpy as np
+
+
+def get_param_value(param: SimpleNamespace):
+    return param.value * param.unit
 
 
 def compute_effective_baselines(

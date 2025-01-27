@@ -22,11 +22,13 @@ max = 360
 [rin]
 name = "rin"
 unit = "mas"
+value = 1
 min = 0
 max = 45
 
 [fwhm]
 name = "fwhm"
 unit = "mas"
+value = 1
 min = 0
 max = 45
