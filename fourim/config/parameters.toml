@@ -24,11 +24,11 @@ name = "rin"
 unit = "mas"
 value = 1
 min = 0
-max = 45
+max = 30
 
 [fwhm]
 name = "fwhm"
 unit = "mas"
 value = 1
 min = 0
-max = 45
+max = 20

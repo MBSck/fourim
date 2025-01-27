@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from ..backend.components import make_component
 from ..backend.options import OPTIONS
 
 
@@ -54,7 +55,7 @@ class SettingsTab(QWidget):
         layout.addLayout(button_layout)
         layout.addWidget(self.model_list)
 
-        self.model_list.addItem("point")
+        self.model_list.addItem("gauss")
         self.add_button.clicked.connect(self.add_model)
         self.remove_button.clicked.connect(self.remove_model)
 
@@ -115,8 +116,8 @@ class SettingsTab(QWidget):
         """Adds the model from the drop down selection to the model list."""
         current_component = self.model_combo.currentText()
         self.model_list.addItem(current_component)
-        OPTIONS.components.current[len(OPTIONS.components.current) + 1] = (
-            OPTIONS.components.avail[current_component]
+        OPTIONS.model.components.current[len(OPTIONS.model.components.current) + 1] = (
+            make_component(current_component)
         )
         self.plots.scroll_bar.update_scrollbar()
         self.plots.display_model()
@@ -129,7 +130,7 @@ class SettingsTab(QWidget):
 
         for item in list_items:
             index = self.model_list.row(item)
-            self.component_manager.remove_component(index)
+            del OPTIONS.model.components.current[index]
             self.model_list.takeItem(index)
 
         self.plots.scroll_bar.update_scrollbar()

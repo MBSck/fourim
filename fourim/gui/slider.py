@@ -84,17 +84,15 @@ class SliderWithInput(QWidget):
 
     def updateLineEdit(self, value: float):
         """Updates the line edit with the new value."""
-        self.lineEdit.setText(f"{value/self.scaling:.2f}")
+        self.lineEdit.setText(f"{value / self.scaling:.2f}")
         if self.index is not None:
-            component = OPTIONS.model.components.current[self.index]
-            breakpoint()
-            getattr(component, self.name).value = value / self.scaling
+            components = OPTIONS.model.components.current
+            getattr(components[self.index].params, self.name).value = value / self.scaling
 
             # TODO: Make this somehow somwhere else so that one slider controls all
-            if self.name in ["inc", "pa"] and OPTIONS.display.coplanar:
-                components = self.component_manager.get_all_components()
-                for comp in components:
-                    getattr(comp, self.name).value = value / self.scaling
+            if self.name in ["cinc", "pa"] and OPTIONS.display.coplanar:
+                for component in components.values():
+                    getattr(component.params, self.name).value = value / self.scaling
 
         self.parent.parent.display_model()
 

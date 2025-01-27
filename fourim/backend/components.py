@@ -43,7 +43,7 @@ def make_component(name: str) -> SimpleNamespace:
 #     return np.sqrt(numerator / denominator)
 
 
-def gaus_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
+def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
     """A Gaussian disk visibility function."""
     fr, fwhm = get_param_value(params.fr), get_param_value(params.fwhm)
     return fr * np.exp(-((np.pi * fwhm.to(u.rad) * spf) ** 2) / (4 * np.log(2)))
@@ -55,9 +55,10 @@ def gaus_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
 #
 
 
-def ring_vis(spf, ps, **kwargs) -> np.ndarray:
+def ring_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
     """A infinitesimally thin ring visibility function."""
-    return kwargs["fr"] * j0(2 * np.pi * kwargs["rin"].to(u.rad) * spf)
+    fr, rin = get_param_value(params.fr), get_param_value(params.rin)
+    return fr * j0(2 * np.pi * rin.to(u.rad) * spf)
 
 
 # TODO: Finish this

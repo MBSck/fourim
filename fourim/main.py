@@ -8,8 +8,7 @@ from .gui.main import MainWindow
 
 
 def main():
-    OPTIONS.model.components.current[0] = make_component("gaus")
-
+    OPTIONS.model.components.current[0] = make_component("gauss")
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

@@ -3,7 +3,7 @@ default:
   - cinc
   - pa
 
-gaus:
+gauss:
   - fwhm
 
 ring:
