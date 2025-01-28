@@ -5,9 +5,8 @@ import astropy.units as u
 import numpy as np
 from scipy.special import j0, j1, jv
 
-from fourim.backend.utils import get_param_value
-
 from .options import OPTIONS
+from .utils import get_param_value
 
 
 def make_component(name: str) -> SimpleNamespace:
@@ -17,7 +16,7 @@ def make_component(name: str) -> SimpleNamespace:
     available_components = OPTIONS.model.components.avail
 
     presets = [
-        *available_components.default,
+        *available_components.point,
         *getattr(available_components, name),
     ]
     params = {}
@@ -25,24 +24,24 @@ def make_component(name: str) -> SimpleNamespace:
         params[param] = getattr(OPTIONS.model.params, param)
 
     component = SimpleNamespace(
-        name=name, vis=functions[f"{name}_vis"],
+        name=name,
+        vis=functions[f"{name}_vis"],
         img=functions[f"{name}_img"],
-        params=SimpleNamespace(**params)
+        params=SimpleNamespace(**params),
     )
     return component
 
 
-# def point_vis(spf, psi, **kwargs) -> np.ndarray:
+# TODO: Implement this point source
+# def point_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
+#     img = np.zeros_like(rho)
+#     img[centre] = 1 * u.mas
+#     return img
+#
+#
+# def point_vis(spf, psi, params: SimpleNamespace) -> float:
 #     """A point source visibility function."""
-#     uv = np.exp(1j * x.to(u.rad) * np.cos(psi)) * np.exp(1j * y.to(u.rad) * np.sin(psi))
-#     return np.exp(2j * np.pi * spf * np.angle(uv) * u.rad)
-
-
-# def binary_vis(spf: 1 / u.rad, psi: u.rad, flux1: u.Jy | u.one, flux2: u.Jy | u.one) -> np.ndarray:
-#     flux_ratio = flux1 / flux2
-#     numerator = (1 + flux_ratio**2 + 2 * flux_ratio * np.cos(2 * np.pi * spf * np.cos(psi)))
-#     denominator = 1 + flux_ratio**2
-#     return np.sqrt(numerator / denominator)
+#     return 1
 
 
 def gauss_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
@@ -56,8 +55,8 @@ def gauss_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
 
 def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
     """A Gaussian disk visibility function."""
-    fr, fwhm = get_param_value(params.fr), get_param_value(params.fwhm)
-    return fr * np.exp(-((np.pi * fwhm.to(u.rad) * spf) ** 2) / (4 * np.log(2)))
+    fwhm = get_param_value(params.fwhm)
+    return np.exp(-((np.pi * fwhm.to(u.rad) * spf) ** 2) / (4 * np.log(2)))
 
 
 # def uniform_disk_vis(spf, psi, **kwargs) -> np.ndarray:
@@ -65,15 +64,15 @@ def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
 #     return 2 * j1(np.pi * diam.to(u.rad) * spf) / (np.pi * diam.to(u.rad) * spf)
 #
 
-def ring_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
-    rin = get_param_value(params.rin)
-    return np.where((rho > rin) & (rho < rin + np.diff(rho)[0]), 1, 0)
 
-
-def ring_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
-    """A infinitesimally thin ring visibility function."""
-    fr, rin = get_param_value(params.fr), get_param_value(params.rin)
-    return fr * j0(2 * np.pi * rin.to(u.rad) * spf)
+# def ring_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
+#     rin = get_param_value(params.rin)
+#     return np.where((rho > rin) & (rho < rin + np.diff(rho)[0]), 1, 0)
+#
+#
+# def ring_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
+#     """A infinitesimally thin ring visibility function."""
+#     return j0(2 * np.pi * get_param_value(params.rin).to(u.rad) * spf)
 
 
 # TODO: Finish this

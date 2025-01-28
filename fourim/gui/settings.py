@@ -40,7 +40,6 @@ class SettingsTab(QWidget):
         self.model_list = QListWidget()
 
         available_components = list(vars(OPTIONS.model.components.avail).keys())
-        available_components.remove("default")
         self.model_combo.addItems(available_components)
 
         self.add_button = QPushButton("+")
@@ -55,7 +54,7 @@ class SettingsTab(QWidget):
         layout.addLayout(button_layout)
         layout.addWidget(self.model_list)
 
-        self.model_list.addItem("gauss")
+        self.model_list.addItem(OPTIONS.model.components.init)
         self.add_button.clicked.connect(self.add_model)
         self.remove_button.clicked.connect(self.remove_model)
 
@@ -88,21 +87,6 @@ class SettingsTab(QWidget):
         hLayout_model_output.addWidget(self.vis2_radio)
         layout.addWidget(title_model_output)
         layout.addLayout(hLayout_model_output)
-
-        title_coplanar = QLabel("Coplanar (shared orientation):")
-        hLayout_coplanar = QHBoxLayout()
-
-        self.coplanar_true_radio = QRadioButton("Yes")
-        self.coplanar_true_radio.toggled.connect(self.toggle_coplanar)
-        self.coplanar_true_radio.setChecked(OPTIONS.display.coplanar)
-        hLayout_coplanar.addWidget(self.coplanar_true_radio)
-
-        self.coplanar_false_radio = QRadioButton("No")
-        self.coplanar_false_radio.toggled.connect(self.toggle_coplanar)
-        self.coplanar_false_radio.setChecked(not OPTIONS.display.coplanar)
-        hLayout_coplanar.addWidget(self.coplanar_false_radio)
-        layout.addWidget(title_coplanar)
-        layout.addLayout(hLayout_coplanar)
 
         title_file = QLabel("Data Files:")
         self.open_file_button = QPushButton("Open (.fits)-file")

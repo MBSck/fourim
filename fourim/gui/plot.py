@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-import astropy.units as u
 import matplotlib
 import matplotlib.lines as mlines
 import numpy as np
@@ -12,7 +11,12 @@ matplotlib.use("Qt5Agg")
 from PySide6.QtWidgets import QGridLayout, QWidget
 
 from ..backend.options import OPTIONS
-from ..backend.utils import compute_image_grid, compute_baselines, get_param_value
+from ..backend.compute import (
+    compute_complex_vis,
+    compute_image,
+    compute_amplitude,
+    compute_phase,
+)
 from .scrollbar import ScrollBar
 
 
@@ -124,103 +128,66 @@ class PlotTab(QWidget):
         components = OPTIONS.model.components.current
         wl, pixel_size = OPTIONS.model.wl, OPTIONS.model.pixel_size
         dim1d, dim2d = OPTIONS.model.one_dim, OPTIONS.model.two_dim
+        max_im = (dim2d / 2 * pixel_size).value
+        spf, complex_vis = compute_complex_vis(components, wl, dim1d)
 
-        if OPTIONS.display.one_dimensional:
-            ucoord = np.linspace(0, 150, dim1d) * u.m
-            # TODO: Make this for each component individually
-            params = list(components.values())[0].params
-            inclination = get_param_value(params.cinc)
-            pos_angle = get_param_value(params.pa)
-            spf, psi = compute_baselines(
-                ucoord,
-                ucoord,
-                inclination,
-                pos_angle,
-            )
-            spf_wl = (spf / wl.to(u.m)).value / u.rad
-            xcoord = np.linspace(-0.5, 0.5, dim2d) * dim2d * pixel_size
-            rho, theta = compute_image_grid(
-                *np.meshgrid(xcoord, xcoord),
-                inclination,
-                pos_angle,
-            )
+        self.canvas_left.update_plot(
+            compute_image(components, pixel_size, dim2d),
+            title="Model Image",
+            vlims=[0, 1],
+            extent=[-max_im, max_im, -max_im, max_im],
+            xlabel=r"$\alpha$ (mas)",
+            ylabel=r"$\delta$ (mas)",
+        )
+        self.canvas_middle.update_plot(
+            spf.value,
+            compute_amplitude(complex_vis),
+            ylims=[-0.1, 1.1],
+            ylabel=r"$V^2$ (a.u.)",
+            title=r"Amplitudes",
+        )
+        self.canvas_right.update_plot(
+            spf.value,
+            compute_phase(complex_vis),
+            ylims=[-185, 185],
+            ylabel=r"$\phi$ ($^\circ$)",
+            title="Phases",
+        )
 
-            complex_vis, image = [], []
-            for component in components.values():
-                complex_vis.append(
-                    component.vis(spf_wl, 0, component.params).astype(complex)
-                )
-                image.append(component.img(rho, theta, component.params))
-
-            # TODO: Work out how to norm this properly here
-            image = np.sum(image, axis=0)
-            image /= image.max()
-
-            # TODO: Work out how to norm this properly here
-            complex_vis = np.sum(complex_vis, axis=0)
-            vis2 = np.abs(complex_vis) ** 2
-            phase = np.angle(complex_vis, deg=True)
-
-            max_im = (dim2d / 2 * pixel_size).value
-            self.canvas_left.update_plot(
-                image,
-                title="Model Image",
-                vlims=[0, 1],
-                extent=[-max_im, max_im, -max_im, max_im],
-                xlabel=r"$\alpha$ (mas)",
-                ylabel=r"$\delta$ (mas)",
-            )
-            self.canvas_middle.update_plot(
-                spf.value,
-                vis2,
-                ylims=[-0.1, 1.1],
-                ylabel=r"$V^2$ (a.u.)",
-                title=r"Amplitudes",
-            )
-            self.canvas_right.update_plot(
-                spf.value,
-                phase,
-                ylims=[-185, 185],
-                ylabel=r"$\phi$ ($^\circ$)",
-                title="Phases",
-            )
-
-            # if self.file_manager.files:
-            #     for readout in self.file_manager.files.values():
-            #         vis = getattr(readout, output)
-            #         # baselines, _ = compute_effective_baselines(
-            #         #         vis.ucoord, vis.ucoord,
-            #         #         components[0].inc.value, components[0].pa.value)
-            #         value = readout.get_data_for_wavelength(
-            #             wl, output, "value"
-            #         ).flatten()
-            #         err = readout.get_data_for_wavelength(wl, output, "err").flatten()
-            #         self.canvas_middle.overplot(baselines, value, yerr=err)
-            #
-            #         t3 = readout.t3
-            #         # baselines, _ = compute_effective_baselines(
-            #         #         t3.u123coord, t3.u123coord,
-            #         #         components[0].inc.value, components[0].pa.value,
-            #         #         longest=True)
-            #
-            #         value = readout.get_data_for_wavelength(wl, "t3", "value").flatten()
-            #         err = readout.get_data_for_wavelength(wl, "t3", "err").flatten()
-            #         self.canvas_right.overplot(baselines, value, yerr=err)
-            #
-            #         complex_vis = np.sum(
-            #             [
-            #                 comp.compute_complex_vis(t3.u123coord, t3.v123coord, wl)
-            #                 for comp in components.values()
-            #             ],
-            #             axis=0,
-            #         )
-            #         # closure_phase = compute_t3(complex_vis)
-            #         self.canvas_right.overplot(baselines, closure_phase)
-            #         self.canvas_right.add_legend()
+        # if self.file_manager.files:
+        #     for readout in self.file_manager.files.values():
+        #         vis = getattr(readout, output)
+        #         # baselines, _ = compute_effective_baselines(
+        #         #         vis.ucoord, vis.ucoord,
+        #         #         components[0].inc.value, components[0].pa.value)
+        #         value = readout.get_data_for_wavelength(
+        #             wl, output, "value"
+        #         ).flatten()
+        #         err = readout.get_data_for_wavelength(wl, output, "err").flatten()
+        #         self.canvas_middle.overplot(baselines, value, yerr=err)
+        #
+        #         t3 = readout.t3
+        #         # baselines, _ = compute_effective_baselines(
+        #         #         t3.u123coord, t3.u123coord,
+        #         #         components[0].inc.value, components[0].pa.value,
+        #         #         longest=True)
+        #
+        #         value = readout.get_data_for_wavelength(wl, "t3", "value").flatten()
+        #         err = readout.get_data_for_wavelength(wl, "t3", "err").flatten()
+        #         self.canvas_right.overplot(baselines, value, yerr=err)
+        #
+        #         complex_vis = np.sum(
+        #             [
+        #                 comp.compute_complex_vis(t3.u123coord, t3.v123coord, wl)
+        #                 for comp in components.values()
+        #             ],
+        #             axis=0,
+        #         )
+        #         # closure_phase = compute_t3(complex_vis)
+        #         self.canvas_right.overplot(baselines, closure_phase)
+        #         self.canvas_right.add_legend()
 
         # TODO: Think about using the real fouriertransform to makes these images quickly
         # use Jax and the symmetries of Fourier transforms.
-        else:
-            # fourier = compute_vis(jnp.fft.fftshift(jnp.fft.fft2(jnp.fft.fftshift(image))))
-            # self.canvas_right.update_plot(fourier)
-            ...
+        # fourier = compute_vis(jnp.fft.fftshift(jnp.fft.fft2(jnp.fft.fftshift(image))))
+        # self.canvas_right.update_plot(fourier)

@@ -30,6 +30,12 @@ def compute_image_grid(
     return rho.squeeze(), theta.squeeze()
 
 
+def translate_img(x: u.mas, y: u.mas, params: SimpleNamespace) -> Tuple:
+    """Shifts the coordinates in image space according to an offset."""
+    x0, y0 = get_param_value(params.x), get_param_value(params.y)
+    return x - x0.to(u.rad), y - y0.to(u.rad)
+
+
 def compute_baselines(
     ucoord: u.m,
     vcoord: u.m,
@@ -80,3 +86,12 @@ def compute_baselines(
         psi = psi[indices, iteration]
 
     return spf.squeeze(), psi.squeeze()
+
+
+def translate_vis(spf: 1 / u.rad, psi: u.rad, params: SimpleNamespace) -> np.ndarray:
+    """Translation in Fourier space."""
+    x, y = get_param_value(params.x).to(u.rad), get_param_value(params.y).to(u.rad)
+    uv = np.exp(1j * x.value * np.cos(psi)) * np.exp(1j * y.value * np.sin(psi))
+    return np.exp(2j * np.pi * spf * np.angle(uv))
+
+

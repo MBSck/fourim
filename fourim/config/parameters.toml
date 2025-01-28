@@ -1,3 +1,17 @@
+[x]
+name = "x"
+unit = "mas"
+value = 0
+min = -25
+max = 25
+
+[y]
+name = "y"
+unit = "mas"
+value = 0
+min = -25
+max = 25
+
 [fr]
 name = "fr"
 unit = "one"

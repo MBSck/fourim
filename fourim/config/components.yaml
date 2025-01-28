@@ -1,4 +1,6 @@
-default:
+point:
+  - x
+  - y
   - fr
   - cinc
   - pa

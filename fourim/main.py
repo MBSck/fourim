@@ -7,9 +7,10 @@ from .backend.options import OPTIONS
 from .gui.main import MainWindow
 
 
-# TODO: Add x and y parameters and a shift as well
+# FIXME: All components seem to share parameters (at least the ones with the same name)
+# TODO: Implement more components
 def main():
-    OPTIONS.model.components.current[0] = make_component("gauss")
+    OPTIONS.model.components.current[0] = make_component(OPTIONS.model.components.init)
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

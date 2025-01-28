@@ -91,11 +91,6 @@ class SliderWithInput(QWidget):
                 value / self.scaling
             )
 
-            # TODO: Make this somehow somwhere else so that one slider controls all
-            if self.name in ["cinc", "pa"] and OPTIONS.display.coplanar:
-                for component in components.values():
-                    getattr(component.params, self.name).value = value / self.scaling
-
         self.parent.parent.display_model()
 
     def updateSliderFromLineEdit(self):
