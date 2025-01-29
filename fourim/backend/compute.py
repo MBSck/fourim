@@ -33,7 +33,7 @@ def compute_complex_vis(
             pa,
         )
         spf_comp_wl = (spf_comp / wl.to(u.m)).value / u.rad
-        vis = component.vis(spf_comp_wl, psi_comp, component.params).astype(complex)
+        vis = component.vis(spf_comp_wl, psi_comp, component.params)
         vis *= translate_vis(spf_comp_wl, psi_comp, component.params).astype(complex)
 
         # FIXME: Interpolation does not do what it should

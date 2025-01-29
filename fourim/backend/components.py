@@ -7,7 +7,7 @@ import numpy as np
 from scipy.special import j0, j1, jv
 
 from .options import OPTIONS
-from .utils import get_param_value
+from .utils import compare_angles, get_param_value
 
 
 def make_component(name: str) -> SimpleNamespace:
@@ -33,16 +33,18 @@ def make_component(name: str) -> SimpleNamespace:
     return component
 
 
-# TODO: Implement this point source
 # def point_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
 #     img = np.zeros_like(rho)
-#     img[centre] = 1 * u.mas
+#     x0, y0 = get_param_value(params.x), get_param_value(params.y)
+#     rho0, theta0 = np.hypot(x0, y0), np.arctan2(y0, x0)
+#     idx = np.argmin(np.hypot(rho - rho0, compare_angles(theta, theta0)))
+#     img.flat[idx] = 1 * u.mas
 #     return img
 #
 #
-# def point_vis(spf, psi, params: SimpleNamespace) -> float:
+# def point_vis(spf, psi, params: SimpleNamespace) -> complex:
 #     """A point source visibility function."""
-#     return 1
+#     return complex(1, 0)
 
 
 def gauss_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
@@ -57,7 +59,9 @@ def gauss_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
 def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
     """A Gaussian disk visibility function."""
     fwhm = get_param_value(params.fwhm)
-    return np.exp(-((np.pi * fwhm.to(u.rad) * spf) ** 2) / (4 * np.log(2)))
+    return np.exp(-((np.pi * fwhm.to(u.rad) * spf) ** 2) / (4 * np.log(2))).astype(
+        complex
+    )
 
 
 # def uniform_disk_vis(spf, psi, **kwargs) -> np.ndarray:
@@ -66,14 +70,14 @@ def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
 #
 
 
-# def ring_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
-#     rin = get_param_value(params.rin)
-#     return np.where((rho > rin) & (rho < rin + np.diff(rho)[0]), 1, 0)
-#
-#
-# def ring_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
-#     """A infinitesimally thin ring visibility function."""
-#     return j0(2 * np.pi * get_param_value(params.rin).to(u.rad) * spf)
+def ring_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
+    rin = get_param_value(params.rin)
+    return np.where((rho > rin) & (rho < rin + 0.1 * u.mas), 1 / (2 * np.pi * rin).value * u.mas, 0)
+
+
+def ring_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
+    """A infinitesimally thin ring visibility function."""
+    return j0(2 * np.pi * get_param_value(params.rin).to(u.rad) * spf).astype(complex)
 
 
 # TODO: Finish this
