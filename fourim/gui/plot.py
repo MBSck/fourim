@@ -2,6 +2,7 @@ from typing import List, Optional
 
 import matplotlib
 import matplotlib.lines as mlines
+import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
@@ -10,14 +11,17 @@ matplotlib.use("Qt5Agg")
 
 from PySide6.QtWidgets import QGridLayout, QWidget
 
-from ..backend.options import OPTIONS
 from ..backend.compute import (
+    compute_amplitude,
     compute_complex_vis,
     compute_image,
-    compute_amplitude,
     compute_phase,
 )
+from ..backend.options import OPTIONS
 from .scrollbar import ScrollBar
+
+# TODO: Make it so this setting can be chosen by user
+plt.style.use("dark_background")
 
 
 class MplCanvas(FigureCanvasQTAgg):
