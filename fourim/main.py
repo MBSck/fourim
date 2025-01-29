@@ -7,7 +7,6 @@ from .backend.options import OPTIONS
 from .gui.main import MainWindow
 
 
-# FIXME: All components seem to share parameters (at least the ones with the same name)
 # TODO: Implement more components
 def main():
     OPTIONS.model.components.current[0] = make_component(OPTIONS.model.components.init)

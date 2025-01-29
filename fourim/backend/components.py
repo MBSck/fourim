@@ -1,3 +1,4 @@
+import copy
 import inspect
 from types import SimpleNamespace
 
@@ -21,7 +22,7 @@ def make_component(name: str) -> SimpleNamespace:
     ]
     params = {}
     for param in presets:
-        params[param] = getattr(OPTIONS.model.params, param)
+        params[param] = copy.deepcopy(getattr(OPTIONS.model.params, param))
 
     component = SimpleNamespace(
         name=name,
