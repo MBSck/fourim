@@ -17,7 +17,7 @@ from ..backend.compute import (
     compute_image,
     compute_phase,
 )
-from ..backend.options import OPTIONS
+from ..config.options import OPTIONS
 from .scrollbar import ScrollBar
 
 # TODO: Make it so this setting can be chosen by user

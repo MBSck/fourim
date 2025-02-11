@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from ..backend.options import OPTIONS
+from ..config.options import OPTIONS
 from .slider import SliderWithInput
 
 

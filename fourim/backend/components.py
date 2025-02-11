@@ -6,7 +6,7 @@ import astropy.units as u
 import numpy as np
 from scipy.special import j0, j1, jv
 
-from .options import OPTIONS
+from ..config.options import OPTIONS
 from .utils import compare_angles, get_param_value
 
 

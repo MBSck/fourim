@@ -1,7 +1,7 @@
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 
-from ..backend.options import OPTIONS
+from ..config.options import OPTIONS
 from .plot import PlotTab
 from .settings import SettingsTab
 

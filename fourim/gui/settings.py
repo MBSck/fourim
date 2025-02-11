@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..backend.components import make_component
-from ..backend.options import OPTIONS
+from ..config.options import OPTIONS
 
 
 # TODO: Move settings tab to its own file

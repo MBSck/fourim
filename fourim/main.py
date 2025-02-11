@@ -3,7 +3,7 @@ import sys
 from PySide6.QtWidgets import QApplication
 
 from .backend.components import make_component
-from .backend.options import OPTIONS
+from .config.options import OPTIONS
 from .gui.main import MainWindow
 
 
