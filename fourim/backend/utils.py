@@ -5,93 +5,75 @@ import astropy.units as u
 import numpy as np
 
 
+def compare_angles(angle1: u.rad, angle2: u.rad) -> u.rad:
+    """Subtracts two angles and makes sure the are between -np.pi and +np.pi."""
+    diff = angle1 - angle2
+    diff[diff > (np.pi * u.rad)] -= 2 * np.pi * u.rad
+    diff[diff < (-np.pi * u.rad)] += 2 * np.pi * u.rad
+    return diff
+
+
 def get_param_value(param: SimpleNamespace):
     return param.value * param.unit
 
 
-def compute_image_grid(
-    xcoord: u.mas,
-    ycoord: u.mas,
-    inclination: u.Quantity[u.one] | None = None,
-    pos_angle: u.Quantity[u.deg] | None = None,
-) -> Tuple[u.Quantity[u.mas], u.Quantity[u.mas]]:
-    if pos_angle is not None:
-        pos_angle = pos_angle.to(u.rad)
-        xcoord_rot = xcoord * np.cos(pos_angle) - ycoord * np.sin(pos_angle)
-        ycoord_rot = xcoord * np.sin(pos_angle) + ycoord * np.cos(pos_angle)
-    else:
-        xcoord_rot, ycoord_rot = xcoord, ycoord
-
-    if inclination is not None:
-        xcoord_rot *= inclination
-
-    rho = np.hypot(xcoord_rot, ycoord_rot)
-    theta = np.arctan2(ycoord_rot, xcoord_rot)
-    return rho.squeeze(), theta.squeeze()
-
-
-def translate_img(x: u.mas, y: u.mas, params: SimpleNamespace) -> Tuple:
-    """Shifts the coordinates in image space according to an offset."""
-    x0, y0 = get_param_value(params.x), get_param_value(params.y)
-    return x - x0.to(u.rad), y - y0.to(u.rad)
-
-
-def compute_baselines(
-    ucoord: u.m,
-    vcoord: u.m,
-    inclination: u.Quantity[u.one] | None = None,
-    pos_angle: u.Quantity[u.deg] | None = None,
-    longest: bool | None = False,
-) -> Tuple[u.Quantity[u.m], u.Quantity[u.one]]:
+def convert_coords_to_polar(
+    x: float | np.ndarray,
+    y: float | np.ndarray,
+    cinc: float | None = None,
+    pa: float | None = None,
+    deg: bool = False,
+) -> Tuple[float | np.ndarray, float | np.ndarray]:
     """Calculates the effective baselines from the projected baselines
     in mega lambda.
 
     Parameters
     ----------
-    ucoord: astropy.units.m
-        The u coordinate.
-    vcoord: astropy.units.m
-        The v coordinate.
-    inclination: astropy.units.one
-        The inclinatin induced compression of the x-axis.
-    pos_angle: astropy.units.deg
-        The positional angle of the object
-    longest : bool, optional
-        If True, the longest baselines are returned.
+    x: float or numpy.ndarray or astropy.units.Quantity
+        The x-coordinate.
+    y: float or numpy.ndarray or astropy.units.Quantity
+        The y-coordinate.
+    cinc: float, optional
+        The cosine of the inclination.
+    pa: float, optional
+        The positional angle of the object (in degree).
+    deg : bool, optional
+        If True, the angle will be returned in degree.
 
     Returns
     -------
-    baselines : astropy.units.m
-        Returns the effective baselines.
-    baselines_angles : astropy.units.rad
-        Returns the effective baseline angles.
+    distance : float or numpy.ndarray
+        Returns the distance to the point.
+    angle : float or numpy.ndarray
+        Returns the angle of the point (radians or degree
+        if "deg=True").
     """
-    if pos_angle is not None:
-        pos_angle = pos_angle.to(u.rad)
-        ucoord_rot = ucoord * np.cos(pos_angle) - vcoord * np.sin(pos_angle)
-        vcoord_rot = ucoord * np.sin(pos_angle) + vcoord * np.cos(pos_angle)
+    if pa is not None:
+        pa = np.deg2rad(pa)
+        xr = x * np.cos(pa) - y * np.sin(pa)
+        yr = x * np.sin(pa) + y * np.cos(pa)
     else:
-        ucoord_rot, vcoord_rot = ucoord, vcoord
+        xr, yr = x, y
 
-    if inclination is not None:
-        ucoord_rot *= inclination
+    if cinc is not None:
+        xr *= cinc
 
-    spf = np.hypot(ucoord_rot, vcoord_rot)
-    psi = np.arctan2(vcoord_rot, ucoord_rot)
-
-    if longest:
-        indices = spf.argmax(0)
-        iteration = np.arange(spf.shape[1])
-        spf = spf[indices, iteration]
-        psi = psi[indices, iteration]
-
-    return spf.squeeze(), psi.squeeze()
+    theta = np.arctan2(xr, yr)
+    return np.hypot(xr, yr), np.rad2deg(theta) if deg else theta
 
 
-def translate_vis(spf: 1 / u.rad, psi: u.rad, params: SimpleNamespace) -> np.ndarray:
+def translate_vis(
+    spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace
+) -> np.ndarray:
     """Translation in Fourier space."""
-    x, y = get_param_value(params.x).to(u.rad), get_param_value(params.y).to(u.rad)
-    uv = np.exp(1j * x.value * np.cos(psi)) * np.exp(1j * y.value * np.sin(psi))
+    x = get_param_value(params.x).to(u.rad).value
+    y = get_param_value(params.y).to(u.rad).value
+    uv = np.exp(1j * x * np.cos(psi)) * np.exp(1j * y * np.sin(psi))
     return np.exp(2j * np.pi * spf * np.angle(uv))
 
 
+def translate_img(x: np.ndarray, y: np.ndarray, params: SimpleNamespace) -> Tuple:
+    """Shifts the coordinates in image space according to an offset."""
+    x0 = get_param_value(params.x).value
+    y0 = get_param_value(params.y).value
+    return x - x0, y - y0

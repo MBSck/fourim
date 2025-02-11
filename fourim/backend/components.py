@@ -47,20 +47,20 @@ def make_component(name: str) -> SimpleNamespace:
 #     return complex(1, 0)
 
 
-def gauss_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
+def gauss_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+    """A Gaussian disk visibility function."""
     fwhm = get_param_value(params.fwhm)
+    return np.exp(
+        -((np.pi * fwhm.to(u.rad).value * spf) ** 2) / (4 * np.log(2))
+    ).astype(complex)
+
+
+def gauss_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+    fwhm = get_param_value(params.fwhm).value
     return (
         np.exp(-4 * np.log(2) * rho**2 / fwhm**2)
         / np.sqrt(np.pi / (4 * np.log(2)))
         / fwhm
-    )
-
-
-def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
-    """A Gaussian disk visibility function."""
-    fwhm = get_param_value(params.fwhm)
-    return np.exp(-((np.pi * fwhm.to(u.rad) * spf) ** 2) / (4 * np.log(2))).astype(
-        complex
     )
 
 
@@ -70,12 +70,14 @@ def gauss_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
 #
 
 
-def ring_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
+def ring_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
     rin = get_param_value(params.rin)
-    return np.where((rho > rin) & (rho < rin + 0.1 * u.mas), 1 / (2 * np.pi * rin).value * u.mas, 0)
+    return np.where(
+        (rho > rin) & (rho < rin + 0.1 * u.mas), 1 / (2 * np.pi * rin).value * u.mas, 0
+    )
 
 
-def ring_vis(spf, psi, params: SimpleNamespace) -> np.ndarray:
+def ring_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
     """A infinitesimally thin ring visibility function."""
     return j0(2 * np.pi * get_param_value(params.rin).to(u.rad) * spf).astype(complex)
 

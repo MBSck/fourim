@@ -16,6 +16,7 @@ from ..backend.compute import (
     compute_complex_vis,
     compute_image,
     compute_phase,
+    convert_coords_to_polar,
 )
 from ..config.options import OPTIONS
 from .scrollbar import ScrollBar
@@ -130,10 +131,12 @@ class PlotTab(QWidget):
     def display_model(self):
         """Displays the model in the plot."""
         components = OPTIONS.model.components.current
+        dim2d = OPTIONS.model.two_dim
         wl, pixel_size = OPTIONS.model.wl, OPTIONS.model.pixel_size
-        dim1d, dim2d = OPTIONS.model.one_dim, OPTIONS.model.two_dim
-        max_im = (dim2d / 2 * pixel_size).value
-        spf, complex_vis = compute_complex_vis(components, wl, dim1d)
+        max_im = dim2d / 2 * pixel_size
+        ucoord = np.linspace(0, 150, OPTIONS.model.one_dim)
+        spf, _ = convert_coords_to_polar(ucoord, ucoord)
+        complex_vis = compute_complex_vis(components, ucoord, wl)
 
         self.canvas_left.update_plot(
             compute_image(components, pixel_size, dim2d),
@@ -144,14 +147,14 @@ class PlotTab(QWidget):
             ylabel=r"$\delta$ (mas)",
         )
         self.canvas_middle.update_plot(
-            spf.value,
+            spf,
             compute_amplitude(complex_vis),
             ylims=[-0.1, 1.1],
             ylabel=r"$V^2$ (a.u.)",
             title=r"Amplitudes",
         )
         self.canvas_right.update_plot(
-            spf.value,
+            spf,
             compute_phase(complex_vis),
             ylims=[-185, 185],
             ylabel=r"$\phi$ ($^\circ$)",

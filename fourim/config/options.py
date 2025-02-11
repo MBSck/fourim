@@ -31,8 +31,8 @@ model = SimpleNamespace(
     params=params,
     one_dim=4096,
     two_dim=512,
-    pixel_size=0.1 * u.mas,
-    wl=[3.2] * u.um,
+    pixel_size=0.1,
+    wl=3.2e-6,
 )
 
 OPTIONS = SimpleNamespace(model=model, geometry=geometry, display=display, files=files)
