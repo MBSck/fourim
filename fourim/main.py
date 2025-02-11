@@ -7,7 +7,7 @@ from .config.options import OPTIONS
 from .gui.main import MainWindow
 
 
-# TODO: Implement more components
+# FIXME: Fix error of not being able to remove components properly
 def main():
     OPTIONS.model.components.current[0] = make_component(OPTIONS.model.components.init)
     app = QApplication(sys.argv)

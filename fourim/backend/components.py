@@ -4,10 +4,10 @@ from types import SimpleNamespace
 
 import astropy.units as u
 import numpy as np
-from scipy.special import j0, j1, jv
+from scipy.special import j0, j1
 
 from ..config.options import OPTIONS
-from .utils import compare_angles, get_param_value
+from .utils import compare_angles, get_param_value, convert_coords_to_polar
 
 
 def make_component(name: str) -> SimpleNamespace:
@@ -33,18 +33,18 @@ def make_component(name: str) -> SimpleNamespace:
     return component
 
 
-# def point_img(rho, theta, params: SimpleNamespace) -> np.ndarray:
-#     img = np.zeros_like(rho)
-#     x0, y0 = get_param_value(params.x), get_param_value(params.y)
-#     rho0, theta0 = np.hypot(x0, y0), np.arctan2(y0, x0)
-#     idx = np.argmin(np.hypot(rho - rho0, compare_angles(theta, theta0)))
-#     img.flat[idx] = 1 * u.mas
-#     return img
-#
-#
-# def point_vis(spf, psi, params: SimpleNamespace) -> complex:
-#     """A point source visibility function."""
-#     return complex(1, 0)
+def point_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> complex:
+    """A point source visibility function."""
+    return complex(1, 0)
+
+
+def point_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+    x0, y0 = get_param_value(params.x).value, get_param_value(params.y).value
+    img = np.zeros_like(rho)
+    rho0, theta0 = convert_coords_to_polar(x0, y0)
+    idx = np.argmin(np.hypot(rho - rho0, compare_angles(phi, theta0)))
+    img.flat[idx] = 1
+    return img
 
 
 def gauss_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
@@ -69,7 +69,7 @@ def uniform_disc_vis(
 ) -> np.ndarray:
     """An uniform disk visibility function."""
     diam = get_param_value(params.diam).to(u.rad).value
-    complex_vis = (2 * j1(np.pi * diam * spf) / (np.pi * diam * spf))
+    complex_vis = 2 * j1(np.pi * diam * spf) / (np.pi * diam * spf)
     return np.nan_to_num(complex_vis.astype(complex), nan=1)
 
 

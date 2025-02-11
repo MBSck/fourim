@@ -12,7 +12,7 @@ display = SimpleNamespace(one_dimensional=True, output="vis2")
 with open(Path(__file__).parent.parent / "config" / "components.yaml", "r") as f:
     avail = yaml.safe_load(f)
 
-components = SimpleNamespace(avail=SimpleNamespace(**avail), current={}, init="gauss")
+components = SimpleNamespace(avail=SimpleNamespace(**avail), current={}, init="point")
 
 with open(Path(__file__).parent.parent / "config" / "parameters.toml", "r") as f:
     params = toml.load(f)
@@ -30,7 +30,7 @@ model = SimpleNamespace(
     components=components,
     params=params,
     one_dim=4096,
-    two_dim=512,
+    two_dim=256,
     pixel_size=0.1,
     wl=3.2e-6,
 )

@@ -1,7 +1,6 @@
 from types import SimpleNamespace
 from typing import Dict
 
-import astropy.units as u
 import numpy as np
 
 from ..config.options import OPTIONS
@@ -22,12 +21,7 @@ def compute_complex_vis(
         fr = get_param_value(component.params.fr).value
         inc = get_param_value(component.params.cinc).value
         pa = get_param_value(component.params.pa).value
-        spf, psi = convert_coords_to_polar(
-            ucoord,
-            ucoord,
-            inc,
-            pa,
-        )
+        spf, psi = convert_coords_to_polar(ucoord, ucoord, inc, pa)
         spf /= wl
         vis = component.vis(spf, psi, component.params)
         vis *= translate_vis(spf, psi, component.params).astype(complex)
@@ -51,7 +45,7 @@ def compute_image(
     components: Dict[str, SimpleNamespace], pixel_size: float, dim: int
 ) -> np.ndarray:
     """Computes the image of the model."""
-    x = np.linspace(-0.5, 0.5, dim) * dim * pixel_size
+    x = np.linspace(-0.5, 0.5, dim, endpoint=False) * dim * pixel_size
     image = []
     for component in components.values():
         fr = get_param_value(component.params.fr).value

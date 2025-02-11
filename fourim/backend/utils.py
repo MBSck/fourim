@@ -5,11 +5,11 @@ import astropy.units as u
 import numpy as np
 
 
-def compare_angles(angle1: u.rad, angle2: u.rad) -> u.rad:
+def compare_angles(angle1: float | np.ndarray, angle2: float | np.ndarray) -> np.ndarray:
     """Subtracts two angles and makes sure the are between -np.pi and +np.pi."""
-    diff = angle1 - angle2
-    diff[diff > (np.pi * u.rad)] -= 2 * np.pi * u.rad
-    diff[diff < (-np.pi * u.rad)] += 2 * np.pi * u.rad
+    diff = np.array([angle1 - angle2])
+    diff[diff > np.pi] -= 2 * np.pi
+    diff[diff < -np.pi] += 2 * np.pi
     return diff
 
 
@@ -17,6 +17,7 @@ def get_param_value(param: SimpleNamespace):
     return param.value * param.unit
 
 
+# TODO: Rewrite this with np.dot -> Should be faster
 def convert_coords_to_polar(
     x: float | np.ndarray,
     y: float | np.ndarray,
