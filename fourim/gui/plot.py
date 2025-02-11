@@ -131,26 +131,28 @@ class PlotTab(QWidget):
     def display_model(self):
         """Displays the model in the plot."""
         components = OPTIONS.model.components.current
-        dim2d = OPTIONS.model.two_dim
         wl, pixel_size = OPTIONS.model.wl, OPTIONS.model.pixel_size
-        max_im = dim2d / 2 * pixel_size
-        ucoord = np.linspace(0, 150, OPTIONS.model.one_dim)
-        spf, _ = convert_coords_to_polar(ucoord, ucoord)
-        complex_vis = compute_complex_vis(components, ucoord, wl)
+        dim, max_im = OPTIONS.model.dim, OPTIONS.model.dim / 2 * pixel_size
 
+        x = np.linspace(-0.5, 0.5, dim, endpoint=False) * max_im * 2
+        xx, yy = np.meshgrid(x, x)
         self.canvas_left.update_plot(
-            compute_image(components, pixel_size, dim2d),
+            compute_image(components, xx, yy),
             title="Model Image",
             vlims=[0, 1],
             extent=[-max_im, max_im, -max_im, max_im],
             xlabel=r"$\alpha$ (mas)",
             ylabel=r"$\delta$ (mas)",
         )
+
+        ucoord = np.linspace(0, 150, dim * 2)
+        spf, _ = convert_coords_to_polar(ucoord, ucoord)
+        complex_vis = compute_complex_vis(components, ucoord, wl)
         self.canvas_middle.update_plot(
             spf,
             compute_amplitude(complex_vis),
             ylims=[-0.1, 1.1],
-            ylabel=r"$V^2$ (a.u.)",
+            ylabel=OPTIONS.display.label,
             title=r"Amplitudes",
         )
         self.canvas_right.update_plot(
@@ -160,41 +162,3 @@ class PlotTab(QWidget):
             ylabel=r"$\phi$ ($^\circ$)",
             title="Phases",
         )
-
-        # if self.file_manager.files:
-        #     for readout in self.file_manager.files.values():
-        #         vis = getattr(readout, output)
-        #         # baselines, _ = compute_effective_baselines(
-        #         #         vis.ucoord, vis.ucoord,
-        #         #         components[0].inc.value, components[0].pa.value)
-        #         value = readout.get_data_for_wavelength(
-        #             wl, output, "value"
-        #         ).flatten()
-        #         err = readout.get_data_for_wavelength(wl, output, "err").flatten()
-        #         self.canvas_middle.overplot(baselines, value, yerr=err)
-        #
-        #         t3 = readout.t3
-        #         # baselines, _ = compute_effective_baselines(
-        #         #         t3.u123coord, t3.u123coord,
-        #         #         components[0].inc.value, components[0].pa.value,
-        #         #         longest=True)
-        #
-        #         value = readout.get_data_for_wavelength(wl, "t3", "value").flatten()
-        #         err = readout.get_data_for_wavelength(wl, "t3", "err").flatten()
-        #         self.canvas_right.overplot(baselines, value, yerr=err)
-        #
-        #         complex_vis = np.sum(
-        #             [
-        #                 comp.compute_complex_vis(t3.u123coord, t3.v123coord, wl)
-        #                 for comp in components.values()
-        #             ],
-        #             axis=0,
-        #         )
-        #         # closure_phase = compute_t3(complex_vis)
-        #         self.canvas_right.overplot(baselines, closure_phase)
-        #         self.canvas_right.add_legend()
-
-        # TODO: Think about using the real fouriertransform to makes these images quickly
-        # use Jax and the symmetries of Fourier transforms.
-        # fourier = compute_vis(jnp.fft.fftshift(jnp.fft.fft2(jnp.fft.fftshift(image))))
-        # self.canvas_right.update_plot(fourier)

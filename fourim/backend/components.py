@@ -88,7 +88,7 @@ def ring_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> np.nd
 
 def ring_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
     rin = get_param_value(params.rin).value
-    return np.where((rho > rin) & (rho < rin + 0.1), 1 / (2 * np.pi * rin), 0)
+    return np.where((rho > rin) & (rho < rin + 0.12), 1 / (2 * np.pi * rin), 0)
 
 
 # TODO: Finish this
