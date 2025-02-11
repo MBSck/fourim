@@ -27,7 +27,8 @@ def compute_complex_vis(
         vis *= translate_vis(spf, psi, component.params).astype(complex)
         complex_vis.append(fr * vis)
 
-    return np.sum(complex_vis, axis=0)
+    complex_vis = np.sum(complex_vis, axis=0)
+    return complex_vis / complex_vis[0]
 
 
 def compute_amplitude(complex_vis: np.ndarray) -> np.ndarray:
