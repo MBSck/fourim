@@ -50,7 +50,7 @@ def compute_image(
     for component in components.values():
         fr = get_param_value(component.params.fr).value
         xs, ys = translate_img(xx, yy, component.params)
-        if component.name == "point":
+        if component.name in ["point", "background"]:
             cinc, pa = 1, 0
         else:
             cinc = get_param_value(component.params.cinc).value

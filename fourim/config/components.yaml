@@ -5,11 +5,13 @@ point:
   - cinc
   - pa
 
+background:
+
 gauss:
   - fwhm
 
 uniform_disc:
   - diam
 
-ring:
+Iring:
   - rin

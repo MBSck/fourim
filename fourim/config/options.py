@@ -12,7 +12,9 @@ settings = SimpleNamespace(display=display)
 with open(Path(__file__).parent.parent / "config" / "components.yaml", "r") as f:
     avail = yaml.safe_load(f)
 
-components = SimpleNamespace(avail=SimpleNamespace(**avail), current={}, init="point")
+components = SimpleNamespace(
+    avail=SimpleNamespace(**avail), current={}, init="background"
+)
 
 with open(Path(__file__).parent.parent / "config" / "parameters.toml", "r") as f:
     params = toml.load(f)
@@ -34,6 +36,4 @@ model = SimpleNamespace(
     wl=3.2e-6,
 )
 
-OPTIONS = SimpleNamespace(
-    model=model, settings=settings, files=files
-)
+OPTIONS = SimpleNamespace(model=model, settings=settings, files=files)
