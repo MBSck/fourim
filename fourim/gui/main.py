@@ -1,7 +1,6 @@
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtWidgets import QMainWindow, QTabWidget
 
-from ..config.options import OPTIONS
 from .plot import PlotTab
 from .settings import SettingsTab
 
@@ -23,12 +22,12 @@ class MainWindow(QMainWindow):
         The tab for the settings.
     """
 
-    def __init__(self):
+    def __init__(self, width: int, height: int):
         """The class's initialiser."""
         super().__init__()
         self.setWindowTitle("Fourim")
         self.setWindowIcon(QIcon(QPixmap("../../assets/icon.png")))
-        self.setGeometry(100, 100, OPTIONS.geometry.width, OPTIONS.geometry.height)
+        self.setGeometry(100, 100, width, height)
 
         self.tab_widget = QTabWidget(self)
         self.setCentralWidget(self.tab_widget)

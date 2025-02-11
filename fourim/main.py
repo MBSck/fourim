@@ -7,11 +7,11 @@ from .config.options import OPTIONS
 from .gui.main import MainWindow
 
 
-# FIXME: Fix error of not being able to remove components properly
 def main():
     OPTIONS.model.components.current[0] = make_component(OPTIONS.model.components.init)
     app = QApplication(sys.argv)
-    window = MainWindow()
+    screen = app.primaryScreen()
+    window = MainWindow(screen.size().width(), screen.size().height())
     window.show()
     sys.exit(app.exec())
 
