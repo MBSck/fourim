@@ -34,7 +34,7 @@ def compute_complex_vis(
 def compute_amplitude(complex_vis: np.ndarray) -> np.ndarray:
     """Computes the amplitude of the complex visibility."""
     vis = np.abs(complex_vis)
-    return vis**2 if OPTIONS.display.amplitude == "vis2" else vis
+    return vis**2 if OPTIONS.settings.display.amplitude == "vis2" else vis
 
 
 def compute_phase(complex_vis: np.ndarray) -> np.ndarray:

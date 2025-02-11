@@ -152,7 +152,7 @@ class PlotTab(QWidget):
             spf,
             compute_amplitude(complex_vis),
             ylims=[-0.1, 1.1],
-            ylabel=OPTIONS.display.label,
+            ylabel=OPTIONS.settings.display.label,
             title=r"Amplitudes",
         )
         self.canvas_right.update_plot(

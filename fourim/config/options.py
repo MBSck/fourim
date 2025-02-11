@@ -6,8 +6,8 @@ import toml
 import yaml
 
 files = {}
-geometry = SimpleNamespace(width=1024, height=400)
-display = SimpleNamespace(one_dimensional=True, output="vis2")
+display = SimpleNamespace(one_dimensional=True, amplitude="vis2", label=r"V^2 (a.u.)")
+settings = SimpleNamespace(display=display)
 
 with open(Path(__file__).parent.parent / "config" / "components.yaml", "r") as f:
     avail = yaml.safe_load(f)
@@ -29,10 +29,11 @@ params = SimpleNamespace(**params)
 model = SimpleNamespace(
     components=components,
     params=params,
-    one_dim=4096,
-    two_dim=256,
+    dim=512,
     pixel_size=0.1,
     wl=3.2e-6,
 )
 
-OPTIONS = SimpleNamespace(model=model, geometry=geometry, display=display, files=files)
+OPTIONS = SimpleNamespace(
+    model=model, settings=settings, files=files
+)
