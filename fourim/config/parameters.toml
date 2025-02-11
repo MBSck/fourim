@@ -40,6 +40,13 @@ value = 1
 min = 0
 max = 30
 
+[diam]
+name = "diam"
+unit = "mas"
+value = 1
+min = 0
+max = 30
+
 [fwhm]
 name = "fwhm"
 unit = "mas"

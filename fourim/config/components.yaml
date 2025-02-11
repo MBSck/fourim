@@ -8,5 +8,8 @@ point:
 gauss:
   - fwhm
 
+uniform_disc:
+  - diam
+
 ring:
   - rin

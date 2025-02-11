@@ -64,22 +64,31 @@ def gauss_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.n
     )
 
 
-# def uniform_disk_vis(spf, psi, **kwargs) -> np.ndarray:
-#     """An uniform disk visibility function."""
-#     return 2 * j1(np.pi * diam.to(u.rad) * spf) / (np.pi * diam.to(u.rad) * spf)
-#
+def uniform_disc_vis(
+    spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace
+) -> np.ndarray:
+    """An uniform disk visibility function."""
+    diam = get_param_value(params.diam).to(u.rad).value
+    complex_vis = (2 * j1(np.pi * diam * spf) / (np.pi * diam * spf))
+    return np.nan_to_num(complex_vis.astype(complex), nan=1)
 
 
-def ring_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
-    rin = get_param_value(params.rin)
-    return np.where(
-        (rho > rin) & (rho < rin + 0.1 * u.mas), 1 / (2 * np.pi * rin).value * u.mas, 0
-    )
+def uniform_disc_img(
+    rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace
+) -> np.ndarray:
+    diam = get_param_value(params.diam).value
+    return np.where(rho < diam / 2, 4 / (np.pi * diam**2), 0)
 
 
 def ring_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
     """A infinitesimally thin ring visibility function."""
-    return j0(2 * np.pi * get_param_value(params.rin).to(u.rad) * spf).astype(complex)
+    rin = get_param_value(params.rin).to(u.rad).value
+    return j0(2 * np.pi * rin * spf).astype(complex)
+
+
+def ring_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+    rin = get_param_value(params.rin).value
+    return np.where((rho > rin) & (rho < rin + 0.1), 1 / (2 * np.pi * rin), 0)
 
 
 # TODO: Finish this
