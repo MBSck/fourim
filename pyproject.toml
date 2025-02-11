@@ -10,19 +10,19 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = {file = "LICENSE"}
 
-keywords = ["astronomy", "interferometry", "visualisation", "fourier", "transformations"]
+keywords = ["astronomy", "interferometry", "visualisation", "fourier"]
 authors = [
 	{name = "Marten Scheuck", email = "martenscheuck@gmail.com"}
 ]
 
 classifiers = [
-	"Development Status :: 2 - Alpha",
+  "Development Status :: 4 - Beta",
 	"Framework :: Sphinx",
 	"License :: OSI Approved :: MIT License",
 	"Natural Language :: English",
 	"Operating System :: OS Independent",
 	"Programming Language :: Python :: 3",
-	"Programming Language :: Python :: 3.9",
+	"Programming Language :: Python :: 3.10",
 	"Topic :: Scientific/Engineering :: Astronomy",
 	"Topic :: Scientific/Engineering :: Physics",
 ]
