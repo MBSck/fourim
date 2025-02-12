@@ -63,5 +63,5 @@ include = ["fourim*"]
 [project.urls]
 repository = "https://github.com/MBSck/fourim"
 
-[project.scripts]
+[project.entry-points.console_scripts]
 fourim = "fourim.main:main"
