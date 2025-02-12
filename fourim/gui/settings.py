@@ -80,6 +80,7 @@ class SettingsTab(QWidget):
         # layout.addWidget(self.open_file_button)
         # layout.addWidget(self.file_widget)
 
+    # FIXME: Doesn't work properly
     def add_model(self) -> None:
         """Adds the model from the drop down selection to the model list."""
         current_component = self.model_combo.currentText()
@@ -90,6 +91,7 @@ class SettingsTab(QWidget):
         self.plots.scroll_bar.update_scrollbar()
         self.plots.display_model()
 
+    # FIXME: Doesn't work properly
     def remove_model(self) -> None:
         """Removes the model from the drop down selection to the model list."""
         items = self.model_list.selectedItems()

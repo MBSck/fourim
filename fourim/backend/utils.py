@@ -1,11 +1,24 @@
+import threading
 from types import SimpleNamespace
-from typing import Tuple
+from typing import Callable, Dict, Tuple
 
 import astropy.units as u
 import numpy as np
 
 
-def compare_angles(angle1: float | np.ndarray, angle2: float | np.ndarray) -> np.ndarray:
+def run_threaded(func: Callable, results: Dict, index: int | str, *args):
+    """A wrapper to run."""
+    def inner(*args):
+        results[index] = func(*args)
+
+    thread = threading.Thread(target=inner, args=args)
+    thread.start()
+    return thread
+
+
+def compare_angles(
+    angle1: float | np.ndarray, angle2: float | np.ndarray
+) -> np.ndarray:
     """Subtracts two angles and makes sure the are between -np.pi and +np.pi."""
     diff = np.array([angle1 - angle2])
     diff[diff > np.pi] -= 2 * np.pi
@@ -70,7 +83,7 @@ def translate_vis(
     x = get_param_value(params.x).to(u.rad).value
     y = get_param_value(params.y).to(u.rad).value
     uv = np.exp(1j * x * np.cos(psi)) * np.exp(1j * y * np.sin(psi))
-    return np.exp(2j * np.pi * spf * np.angle(uv))
+    return np.exp(2j * np.pi * spf * np.angle(uv)).astype(complex)
 
 
 def translate_img(x: np.ndarray, y: np.ndarray, params: SimpleNamespace) -> Tuple:

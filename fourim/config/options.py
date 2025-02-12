@@ -18,7 +18,7 @@ def compute_fourier_grid(model: SimpleNamespace) -> Tuple[NDArray, NDArray]:
 
 def compute_image_grid(model: SimpleNamespace) -> Tuple[NDArray, NDArray]:
     """Computes the image grid."""
-    if model.dim == model.xx.shape[0]:
+    if model.xx is not None and model.dim == model.xx.shape[0]:
         return model.xx, model.yy
 
     x = np.linspace(-0.5, 0.5, model.dim, endpoint=False) * model.max_im * 2
@@ -61,6 +61,6 @@ model = SimpleNamespace(
 )
 
 model.max_im = model.dim / 2 * model.pixel_size
-model.u,model.spf = compute_fourier_grid(model)
-model.xx,model.yy = compute_image_grid(model)
+model.u, model.spf = compute_fourier_grid(model)
+model.xx, model.yy = compute_image_grid(model)
 OPTIONS = SimpleNamespace(model=model, settings=settings, files=files)

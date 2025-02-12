@@ -3,21 +3,16 @@ from typing import List, Optional
 import matplotlib
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from numpy.typing import NDArray
 
 matplotlib.use("Qt5Agg")
 
 from PySide6.QtWidgets import QGridLayout, QWidget
 
-from ..backend.compute import (
-    compute_amplitude,
-    compute_complex_vis,
-    compute_image,
-    compute_phase,
-    convert_coords_to_polar,
-)
+from ..backend.compute import compute_complex_vis, compute_image
+from ..backend.utils import run_threaded
 from ..config.options import OPTIONS
 from .scrollbar import ScrollBar
 
@@ -51,23 +46,23 @@ class MplCanvas(FigureCanvasQTAgg):
 
     def update_plot(
         self,
-        xdata: np.ndarray,
-        ydata: Optional[np.ndarray] = None,
+        x: NDArray,
+        y: Optional[NDArray] = None,
         ylims: Optional[List[float]] = None,
         extent: Optional[List[float]] = None,
         title: Optional[str] = None,
-        vlims: Optional[List[float]] = [None, None],
+        vlims: Optional[List[float | None]] = [None, None],
         xlabel: Optional[str] = None,
         ylabel: Optional[str] = None,
     ) -> None:
         """Update the plot with the new model images."""
         self.axes.cla()
-        if ydata is not None:
-            self.axes.plot(xdata, ydata)
+        if y is not None:
+            self.axes.plot(x, y)
             self.axes.set_ylim(ylims)
             self.axes.set_xlabel(r"$B_{\mathrm{eff}}$ $\left(\mathrm{M}\lambda\right)$")
         else:
-            self.axes.imshow(xdata, extent=extent, vmin=vlims[0], vmax=vlims[1])
+            self.axes.imshow(x, extent=extent, vmin=vlims[0], vmax=vlims[1])
             self.axes.set_xlabel(xlabel)
         self.axes.set_ylabel(ylabel)
         self.axes.set_title(title)
@@ -76,16 +71,16 @@ class MplCanvas(FigureCanvasQTAgg):
     # TODO: Add Better color support
     def overplot(
         self,
-        xdata: np.ndarray,
-        ydata: np.ndarray,
-        yerr: Optional[np.ndarray] = None,
+        x: NDArray,
+        y: NDArray,
+        yerr: Optional[NDArray] = None,
         label: Optional[str] = None,
     ) -> None:
         """Overplot the data."""
         if yerr is not None:
-            self.axes.errorbar(xdata, ydata, yerr, label=label, fmt="o")
+            self.axes.errorbar(x, y, yerr, label=label, fmt="o")
         else:
-            self.axes.scatter(xdata, ydata, label=label, marker="X")
+            self.axes.scatter(x, y, label=label, marker="X")
         self.draw()
 
     def add_legend(self) -> None:
@@ -130,34 +125,44 @@ class PlotTab(QWidget):
     # TODO: Add legend at some point
     def display_model(self):
         """Displays the model in the plot."""
-        components = OPTIONS.model.components.current
-        wl, pixel_size = OPTIONS.model.wl, OPTIONS.model.pixel_size
-        dim, max_im = OPTIONS.model.dim, OPTIONS.model.dim / 2 * pixel_size
+        model = OPTIONS.model
+        vis_thread = run_threaded(
+            compute_complex_vis,
+            model.results,
+            "vis",
+            model.components.current,
+            model.u,
+            model.wl,
+        )
+        img_thread = run_threaded(
+            compute_image,
+            model.results,
+            "img",
+            model.components.current,
+            model.xx,
+            model.yy,
+        )
+        img_thread.join()
+        vis_thread.join()
 
-        x = np.linspace(-0.5, 0.5, dim, endpoint=False) * max_im * 2
-        xx, yy = np.meshgrid(x, x)
         self.canvas_left.update_plot(
-            compute_image(components, xx, yy),
+            model.results["img"],
             title="Model Image",
             vlims=[0, 1],
-            extent=[-max_im, max_im, -max_im, max_im],
+            extent=[-model.max_im, model.max_im, -model.max_im, model.max_im],
             xlabel=r"$\alpha$ (mas)",
             ylabel=r"$\delta$ (mas)",
         )
-
-        ucoord = np.linspace(0, 150, dim * 2)
-        spf, _ = convert_coords_to_polar(ucoord, ucoord)
-        complex_vis = compute_complex_vis(components, ucoord, wl)
         self.canvas_middle.update_plot(
-            spf,
-            compute_amplitude(complex_vis),
+            model.spf,
+            model.results["vis"][0],
             ylims=[-0.1, 1.1],
             ylabel=OPTIONS.settings.display.label,
             title=r"Amplitudes",
         )
         self.canvas_right.update_plot(
-            spf,
-            compute_phase(complex_vis),
+            model.spf,
+            model.results["vis"][1],
             ylims=[-185, 185],
             ylabel=r"$\phi$ ($^\circ$)",
             title="Phases",
