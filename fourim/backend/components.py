@@ -15,10 +15,9 @@ def make_component(name: str) -> SimpleNamespace:
     """Makes a component from the presets."""
     current_module = inspect.getmodule(inspect.currentframe())
     functions = dict(inspect.getmembers(current_module, inspect.isfunction))
-    available_components = OPTIONS.model.components.avail
     presets = [
-        *available_components.point,
-        *(getattr(available_components, name) or []),
+        *OPTIONS.model.components.avail.point,
+        *(getattr(OPTIONS.model.components.avail, name) or []),
     ]
 
     params = {}

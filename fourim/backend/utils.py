@@ -2,12 +2,12 @@ import threading
 from types import SimpleNamespace
 from typing import Callable, Dict, Tuple
 
-import astropy.units as u
 import numpy as np
 
 
 def run_threaded(func: Callable, results: Dict, index: int | str, *args):
     """A wrapper to run."""
+
     def inner(*args):
         results[index] = func(*args)
 
@@ -74,20 +74,3 @@ def convert_coords_to_polar(
 
     theta = np.arctan2(xr, yr)
     return np.hypot(xr, yr), np.rad2deg(theta) if deg else theta
-
-
-def translate_vis(
-    spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace
-) -> np.ndarray:
-    """Translation in Fourier space."""
-    x = get_param_value(params.x).to(u.rad).value
-    y = get_param_value(params.y).to(u.rad).value
-    uv = np.exp(1j * x * np.cos(psi)) * np.exp(1j * y * np.sin(psi))
-    return np.exp(2j * np.pi * spf * np.angle(uv)).astype(complex)
-
-
-def translate_img(x: np.ndarray, y: np.ndarray, params: SimpleNamespace) -> Tuple:
-    """Shifts the coordinates in image space according to an offset."""
-    x0 = get_param_value(params.x).value
-    y0 = get_param_value(params.y).value
-    return x - x0, y - y0
