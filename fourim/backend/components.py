@@ -4,10 +4,11 @@ from types import SimpleNamespace
 
 import astropy.units as u
 import numpy as np
+from numpy.typing import NDArray
 from scipy.special import j0, j1
 
 from ..config.options import OPTIONS
-from .utils import compare_angles, get_param_value, convert_coords_to_polar
+from .utils import compare_angles, convert_coords_to_polar, get_param_value
 
 
 def make_component(name: str) -> SimpleNamespace:
@@ -34,7 +35,7 @@ def make_component(name: str) -> SimpleNamespace:
 
 
 def background_vis(
-    spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace
+    spf: NDArray, psi: NDArray, params: SimpleNamespace
 ) -> complex:
     """A background's complex visibility."""
     complex_vis = np.zeros_like(spf)
@@ -43,18 +44,18 @@ def background_vis(
 
 
 def background_img(
-    rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace
-) -> np.ndarray:
+    rho: NDArray, phi: NDArray, params: SimpleNamespace
+) -> NDArray:
     """A background's image."""
     return np.ones_like(rho)
 
 
-def point_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> complex:
+def point_vis(spf: NDArray, psi: NDArray, params: SimpleNamespace) -> complex:
     """A point source's complex visibility."""
     return complex(1, 0)
 
 
-def point_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+def point_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
     """A point source's image."""
     x0, y0 = get_param_value(params.x).value, get_param_value(params.y).value
     img = np.zeros_like(rho)
@@ -64,7 +65,7 @@ def point_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.n
     return img
 
 
-def gauss_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+def gauss_vis(spf: NDArray, psi: NDArray, params: SimpleNamespace) -> NDArray:
     """A Gaussian's visibility."""
     fwhm = get_param_value(params.fwhm)
     return np.exp(
@@ -72,7 +73,7 @@ def gauss_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> np.n
     ).astype(complex)
 
 
-def gauss_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+def gauss_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
     """A Gaussian's image."""
     fwhm = get_param_value(params.fwhm).value
     return (
@@ -83,8 +84,8 @@ def gauss_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.n
 
 
 def uniform_disc_vis(
-    spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace
-) -> np.ndarray:
+    spf: NDArray, psi: NDArray, params: SimpleNamespace
+) -> NDArray:
     """An uniform disc's visibility."""
     diam = get_param_value(params.diam).to(u.rad).value
     complex_vis = 2 * j1(np.pi * diam * spf) / (np.pi * diam * spf)
@@ -92,26 +93,26 @@ def uniform_disc_vis(
 
 
 def uniform_disc_img(
-    rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace
-) -> np.ndarray:
+    rho: NDArray, phi: NDArray, params: SimpleNamespace
+) -> NDArray:
     """A uniform disc's image."""
     diam = get_param_value(params.diam).value
     return np.where(rho < diam / 2, 4 / (np.pi * diam**2), 0)
 
 
-def Iring_vis(spf: np.ndarray, psi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+def Iring_vis(spf: NDArray, psi: NDArray, params: SimpleNamespace) -> NDArray:
     """An infinitesimally thin ring's visibility."""
     rin = get_param_value(params.rin).to(u.rad).value
     return j0(2 * np.pi * rin * spf).astype(complex)
 
 
-def Iring_img(rho: np.ndarray, phi: np.ndarray, params: SimpleNamespace) -> np.ndarray:
+def Iring_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
     """An infinitesimally thin ring's image."""
     rin = get_param_value(params.rin).value
     return np.where((rho > rin) & (rho < rin + 0.12), 1 / (2 * np.pi * rin), 0)
 
 
 # TODO: Implement this
-# def asymmetric_ring_vis(spf: 1 / u.rad, psi: u.rad, rin: u.mas, order: int, **kwargs) -> np.ndarray:
+# def asymmetric_ring_vis(spf: 1 / u.rad, psi: u.rad, rin: u.mas, order: int, **kwargs) -> NDArray:
 #     """A infinitesimally thin ring visibility function."""
 #     return j0(2 * np.pi * rin.to(u.rad) * spf).astype(complex)

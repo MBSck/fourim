@@ -1,7 +1,7 @@
 from types import SimpleNamespace
-from typing import Dict
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ..config.options import OPTIONS
 from .utils import (
@@ -13,8 +13,8 @@ from .utils import (
 
 
 def compute_complex_vis(
-    components: SimpleNamespace, ucoord: np.ndarray, wl: np.ndarray
-) -> np.ndarray:
+    components: SimpleNamespace, ucoord: NDArray, wl: NDArray
+) -> NDArray:
     """Computes the complex visibility of the model."""
     complex_vis = []
     for component in components.values():
@@ -31,20 +31,18 @@ def compute_complex_vis(
     return complex_vis / complex_vis[0]
 
 
-def compute_amplitude(complex_vis: np.ndarray) -> np.ndarray:
+def compute_amplitude(complex_vis: NDArray) -> NDArray:
     """Computes the amplitude of the complex visibility."""
     vis = np.abs(complex_vis)
     return vis**2 if OPTIONS.settings.display.amplitude == "vis2" else vis
 
 
-def compute_phase(complex_vis: np.ndarray) -> np.ndarray:
+def compute_phase(complex_vis: NDArray) -> NDArray:
     """Computes the phase of the complex visibility."""
     return np.angle(complex_vis, deg=True)
 
 
-def compute_image(
-    components: Dict[str, SimpleNamespace], xx: np.ndarray, yy: np.ndarray
-) -> np.ndarray:
+def compute_image(components: SimpleNamespace, xx: NDArray, yy: NDArray) -> NDArray:
     """Computes the image of the model."""
     image = []
     for component in components.values():
