@@ -7,7 +7,6 @@ from .config.options import OPTIONS
 from .gui.main import MainWindow
 
 
-# TODO: Make issue for future features
 def main():
     OPTIONS.model.components.current[0] = make_component(OPTIONS.model.components.init)
     app = QApplication(sys.argv)

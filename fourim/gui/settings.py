@@ -80,18 +80,16 @@ class SettingsTab(QWidget):
         # layout.addWidget(self.open_file_button)
         # layout.addWidget(self.file_widget)
 
-    # FIXME: Doesn't work properly
     def add_model(self) -> None:
         """Adds the model from the drop down selection to the model list."""
         current_component = self.model_combo.currentText()
         self.model_list.addItem(current_component)
-        OPTIONS.model.components.current[self.model_combo.currentIndex()] = (
+        OPTIONS.model.components.current[len(OPTIONS.model.components.current)] = (
             make_component(current_component)
         )
         self.plots.scroll_bar.update_scrollbar()
         self.plots.display_model()
 
-    # FIXME: Doesn't work properly
     def remove_model(self) -> None:
         """Removes the model from the drop down selection to the model list."""
         items = self.model_list.selectedItems()
@@ -102,7 +100,9 @@ class SettingsTab(QWidget):
         index = self.model_list.row(item)
         self.model_list.takeItem(index)
         del OPTIONS.model.components.current[index]
-
+        OPTIONS.model.components.current = {
+            k: v for k, v in enumerate(OPTIONS.model.components.current.values())
+        }
         self.plots.scroll_bar.update_scrollbar()
         self.plots.display_model()
 
