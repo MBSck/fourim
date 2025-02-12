@@ -13,7 +13,7 @@ with open(Path(__file__).parent.parent / "config" / "components.yaml", "r") as f
     avail = yaml.safe_load(f)
 
 components = SimpleNamespace(
-    avail=SimpleNamespace(**avail), current={}, init="background"
+    avail=SimpleNamespace(**avail), current={}, init="point"
 )
 
 with open(Path(__file__).parent.parent / "config" / "parameters.toml", "r") as f:
