@@ -58,7 +58,8 @@ def point_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
     """A point source's image."""
     x0, y0 = get_param_value(params.x).value, get_param_value(params.y).value
     img = np.zeros_like(rho)
-    rho0, theta0 = transform_coordinates(x0, y0)
+    x0t, y0t = transform_coordinates(x0, y0)
+    rho0, theta0 = np.hypot(x0t, y0t), np.arctan2(x0t, y0t)
     idx = np.argmin(np.hypot(rho - rho0, compare_angles(phi, theta0)))
     img.flat[idx] = 1
     return img
