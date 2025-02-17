@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from scipy.special import j0, j1
 
 from ..config.options import OPTIONS
-from .utils import compare_angles, convert_coords_to_polar, get_param_value
+from .utils import compare_angles, transform_coordinates, get_param_value
 
 
 def make_component(name: str) -> SimpleNamespace:
@@ -58,7 +58,7 @@ def point_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
     """A point source's image."""
     x0, y0 = get_param_value(params.x).value, get_param_value(params.y).value
     img = np.zeros_like(rho)
-    rho0, theta0 = convert_coords_to_polar(x0, y0)
+    rho0, theta0 = transform_coordinates(x0, y0)
     idx = np.argmin(np.hypot(rho - rho0, compare_angles(phi, theta0)))
     img.flat[idx] = 1
     return img

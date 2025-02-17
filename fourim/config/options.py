@@ -8,12 +8,12 @@ import toml
 import yaml
 from numpy.typing import NDArray
 
-from ..backend.utils import convert_coords_to_polar
+from ..backend.utils import transform_coordinates
 
 
 def compute_fourier_grid(model: SimpleNamespace) -> Tuple[NDArray, NDArray]:
     ucoord = np.linspace(0, 150, model.dim * 2)
-    return ucoord, convert_coords_to_polar(ucoord, ucoord)[0]
+    return ucoord, np.hypot(*transform_coordinates(ucoord, ucoord))
 
 
 def compute_image_grid(model: SimpleNamespace) -> Tuple[NDArray, NDArray]:
