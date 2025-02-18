@@ -33,6 +33,13 @@ value = 0
 min = 0
 max = 360
 
+[hlr]
+name = "hlr"
+unit = "mas"
+value = 1
+min = 0
+max = 30
+
 [rin]
 name = "rin"
 unit = "mas"

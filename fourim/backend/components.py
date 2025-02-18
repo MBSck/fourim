@@ -33,18 +33,14 @@ def make_component(name: str) -> SimpleNamespace:
     return component
 
 
-def background_vis(
-    spf: NDArray, psi: NDArray, params: SimpleNamespace
-) -> complex:
+def background_vis(spf: NDArray, psi: NDArray, params: SimpleNamespace) -> complex:
     """A background's complex visibility."""
     complex_vis = np.zeros_like(spf)
     complex_vis[np.where(spf == 0)[0]] = 1
     return complex_vis.astype(complex)
 
 
-def background_img(
-    rho: NDArray, phi: NDArray, params: SimpleNamespace
-) -> NDArray:
+def background_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
     """A background's image."""
     return np.ones_like(rho)
 
@@ -83,18 +79,26 @@ def gauss_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
     )
 
 
-def uniform_disc_vis(
-    spf: NDArray, psi: NDArray, params: SimpleNamespace
-) -> NDArray:
+def lorentz_vis(spf: NDArray, psi: NDArray, params: SimpleNamespace) -> NDArray:
+    """A Gaussian's visibility."""
+    hlr = get_param_value(params.hlr)
+    return np.exp(-2 * np.pi * hlr.to(u.rad).value * spf / np.sqrt(3)).astype(complex)
+
+
+def lorentz_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
+    """A Gaussian's image."""
+    hlr = get_param_value(params.hlr).value
+    return hlr / (2 * np.pi * np.sqrt(3)) * (hlr**2 / 3 + rho**2) ** (-3 / 2)
+
+
+def uniform_disc_vis(spf: NDArray, psi: NDArray, params: SimpleNamespace) -> NDArray:
     """An uniform disc's visibility."""
     diam = get_param_value(params.diam).to(u.rad).value
     complex_vis = 2 * j1(np.pi * diam * spf) / (np.pi * diam * spf)
     return np.nan_to_num(complex_vis.astype(complex), nan=1)
 
 
-def uniform_disc_img(
-    rho: NDArray, phi: NDArray, params: SimpleNamespace
-) -> NDArray:
+def uniform_disc_img(rho: NDArray, phi: NDArray, params: SimpleNamespace) -> NDArray:
     """A uniform disc's image."""
     diam = get_param_value(params.diam).value
     return np.where(rho < diam / 2, 4 / (np.pi * diam**2), 0)
