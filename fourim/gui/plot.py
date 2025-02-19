@@ -3,6 +3,7 @@ from typing import List, Optional
 import matplotlib
 import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from numpy.typing import NDArray
@@ -125,27 +126,28 @@ class PlotTab(QWidget):
     def display_model(self):
         """Displays the model in the plot."""
         model = OPTIONS.model
-        vis = compute.complex_vis(model.components.current, model.u, model.wl)
-        image = compute.image(model.components.current, model.xx, model.yy)
+        amp, phase = compute.complex_vis(model.components.current, model.u, model.wl)
+        # image = compute.image(model.components.current, model.xx, model.yy)
 
-        self.canvas_left.update_plot(
-            model.results["img"],
-            title="Model Image",
-            vlims=[0, 1],
-            extent=[-model.max_im, model.max_im, -model.max_im, model.max_im],
-            xlabel=r"$\alpha$ (mas)",
-            ylabel=r"$\delta$ (mas)",
-        )
+        # TODO: Reimplement this
+        # self.canvas_left.update_plot(
+        #     image,
+        #     title="Model Image",
+        #     vlims=[0, 1],
+        #     extent=[-model.max_im, model.max_im, -model.max_im, model.max_im],
+        #     xlabel=r"$\alpha$ (mas)",
+        #     ylabel=r"$\delta$ (mas)",
+        # )
         self.canvas_middle.update_plot(
             model.spf,
-            compute.vis(vis),
+            amp,
             ylims=[-0.1, 1.1],
             ylabel=OPTIONS.settings.display.label,
             title=r"Amplitudes",
         )
         self.canvas_right.update_plot(
             model.spf,
-            compute.phase(vis),
+            phase,
             ylims=[-185, 185],
             ylabel=r"$\phi$ ($^\circ$)",
             title="Phases",

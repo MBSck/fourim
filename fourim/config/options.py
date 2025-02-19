@@ -7,13 +7,13 @@ import numpy as np
 import toml
 import yaml
 from numpy.typing import NDArray
+from juliacall import Main as jl
 
-from ..backend.utils import transform_coordinates
-
+jl.include("fourim/backend/utils.jl")
 
 def compute_fourier_grid(model: SimpleNamespace) -> Tuple[NDArray, NDArray]:
     ucoord = np.linspace(0, 150, model.dim * 2)
-    return ucoord, np.hypot(*transform_coordinates(ucoord, ucoord))
+    return ucoord, np.hypot(*np.array(jl.transform(ucoord, ucoord)).T)
 
 
 def compute_image_grid(model: SimpleNamespace) -> Tuple[NDArray, NDArray]:
