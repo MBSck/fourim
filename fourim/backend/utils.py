@@ -1,19 +1,7 @@
-import threading
 from types import SimpleNamespace
-from typing import Callable, Dict, Tuple
+from typing import Tuple
 
 import numpy as np
-
-
-def run_threaded(func: Callable, results: Dict, index: int | str, *args):
-    """A wrapper to run."""
-
-    def inner(*args):
-        results[index] = func(*args)
-
-    thread = threading.Thread(target=inner, args=args)
-    thread.start()
-    return thread
 
 
 def compare_angles(

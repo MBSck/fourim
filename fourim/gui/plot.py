@@ -11,8 +11,7 @@ matplotlib.use("Qt5Agg")
 
 from PySide6.QtWidgets import QGridLayout, QWidget
 
-from ..backend.compute import compute_complex_vis, compute_image
-from ..backend.utils import run_threaded
+from ..backend import compute
 from ..config.options import OPTIONS
 from .scrollbar import ScrollBar
 
@@ -126,24 +125,8 @@ class PlotTab(QWidget):
     def display_model(self):
         """Displays the model in the plot."""
         model = OPTIONS.model
-        vis_thread = run_threaded(
-            compute_complex_vis,
-            model.results,
-            "vis",
-            model.components.current,
-            model.u,
-            model.wl,
-        )
-        img_thread = run_threaded(
-            compute_image,
-            model.results,
-            "img",
-            model.components.current,
-            model.xx,
-            model.yy,
-        )
-        img_thread.join()
-        vis_thread.join()
+        vis = compute.complex_vis(model.components.current, model.u, model.wl)
+        image = compute.image(model.components.current, model.xx, model.yy)
 
         self.canvas_left.update_plot(
             model.results["img"],
@@ -155,14 +138,14 @@ class PlotTab(QWidget):
         )
         self.canvas_middle.update_plot(
             model.spf,
-            model.results["vis"][0],
+            compute.vis(vis),
             ylims=[-0.1, 1.1],
             ylabel=OPTIONS.settings.display.label,
             title=r"Amplitudes",
         )
         self.canvas_right.update_plot(
             model.spf,
-            model.results["vis"][1],
+            compute.phase(vis),
             ylims=[-185, 185],
             ylabel=r"$\phi$ ($^\circ$)",
             title="Phases",
