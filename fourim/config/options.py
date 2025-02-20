@@ -25,10 +25,6 @@ def compute_image_grid(model: SimpleNamespace) -> Tuple[NDArray, NDArray]:
     return np.meshgrid(x, x)
 
 
-files = {}
-display = SimpleNamespace(one_dimensional=True, amplitude="vis2", label=r"V^2 (a.u.)")
-settings = SimpleNamespace(display=display)
-
 with open(Path(__file__).parent.parent / "config" / "components.yaml", "r") as f:
     avail = yaml.safe_load(f)
 
@@ -46,6 +42,7 @@ for key, value in params.items():
     params[key] = SimpleNamespace(**params[key])
 
 params = SimpleNamespace(**params)
+# TODO: Compute the things that are computable at the first time if the dim is not updated
 model = SimpleNamespace(
     components=components,
     params=params,
