@@ -1,6 +1,8 @@
 
 # Fourim
 
+> [!NOTE]
+> Active development of this tool has been moved to https://codeberg.org/MBSck/fourim.git
 ## Installation
 
 One can install Fourim either directly via pip from GitHub,
